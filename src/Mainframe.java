@@ -1,14 +1,20 @@
 public class Mainframe {
+    private String macAdress;
     private String timestamp;
     private String identificaoMainframe;
-    private Integer usoCpuTotal;
-    private Integer usoRamTotal;
-    private Integer swapRateMbs;
-    private Integer tempoCpuOciosa;
-    private Integer cpuIoWait;
-    private Integer usoDiscoTotal;
-    private Integer discoIopsTotal;
-    private Integer discoThroughputMbs;
+    private Double usoCpuTotal;
+    private Double usoRamTotal;
+    private Double swapRateMbs;
+    private Double tempoCpuOciosa;
+    private Double cpuIoWait;
+    private Double usoDiscoTotal;
+    private Double discoIopsTotal;
+
+    public Mainframe(Double discoThroughputMbs) {
+        this.discoThroughputMbs = discoThroughputMbs;
+    }
+
+    private Double discoThroughputMbs;
     private Integer discoReadCount;
     private Integer discoWriteCount;
     private Double discoLatenciaMs;
@@ -16,7 +22,8 @@ public class Mainframe {
     @Override
     public String toString() {
         return "Mainframe{" +
-                "timestamp='" + timestamp + '\'' +
+                "macAdress='" + macAdress + '\'' +
+                ", timestamp='" + timestamp + '\'' +
                 ", identificaoMainframe='" + identificaoMainframe + '\'' +
                 ", usoCpuTotal=" + usoCpuTotal +
                 ", usoRamTotal=" + usoRamTotal +
@@ -32,6 +39,14 @@ public class Mainframe {
                 '}';
     }
 
+    public String getMacAdress() {
+        return macAdress;
+    }
+
+    public void setMacAdress(String macAdress) {
+        this.macAdress = macAdress;
+    }
+
     public String getTimestamp() {
         return timestamp;
     }
@@ -40,20 +55,80 @@ public class Mainframe {
         this.timestamp = timestamp;
     }
 
-    public Double getDiscoLatenciaMs() {
-        return discoLatenciaMs;
+    public String getIdentificaoMainframe() {
+        return identificaoMainframe;
     }
 
-    public void setDiscoLatenciaMs(Double discoLatenciaMs) {
-        this.discoLatenciaMs = discoLatenciaMs;
+    public void setIdentificaoMainframe(String identificaoMainframe) {
+        this.identificaoMainframe = identificaoMainframe;
     }
 
-    public Integer getDiscoWriteCount() {
-        return discoWriteCount;
+    public Double getUsoCpuTotal() {
+        return usoCpuTotal;
     }
 
-    public void setDiscoWriteCount(Integer discoWriteCount) {
-        this.discoWriteCount = discoWriteCount;
+    public void setUsoCpuTotal(Double usoCpuTotal) {
+        this.usoCpuTotal = usoCpuTotal;
+    }
+
+    public Double getUsoRamTotal() {
+        return usoRamTotal;
+    }
+
+    public void setUsoRamTotal(Double usoRamTotal) {
+        this.usoRamTotal = usoRamTotal;
+    }
+
+    public Double getSwapRateMbs() {
+        return swapRateMbs;
+    }
+
+    public void setSwapRateMbs(Double swapRateMbs) {
+        this.swapRateMbs = swapRateMbs;
+    }
+
+    public Double getTempoCpuOciosa() {
+        return tempoCpuOciosa;
+    }
+
+    public void setTempoCpuOciosa(Double tempoCpuOciosa) {
+        this.tempoCpuOciosa = tempoCpuOciosa;
+    }
+
+    public Double getCpuIoWait() {
+        return cpuIoWait;
+    }
+
+    public void setCpuIoWait(Double cpuIoWait) {
+        this.cpuIoWait = cpuIoWait;
+    }
+
+    public Double getUsoDiscoTotal() {
+        return usoDiscoTotal;
+    }
+
+    public void setUsoDiscoTotal(Double usoDiscoTotal) {
+        this.usoDiscoTotal = usoDiscoTotal;
+    }
+
+   public Mainframe(){
+
+   }
+
+    public Double getDiscoIopsTotal() {
+        return discoIopsTotal;
+    }
+
+    public void setDiscoIopsTotal(Double discoIopsTotal) {
+        this.discoIopsTotal = discoIopsTotal;
+    }
+
+    public Double getDiscoThroughputMbs() {
+        return discoThroughputMbs;
+    }
+
+    public void setDiscoThroughputMbs(Double discoThroughputMbs) {
+        this.discoThroughputMbs = discoThroughputMbs;
     }
 
     public Integer getDiscoReadCount() {
@@ -64,75 +139,19 @@ public class Mainframe {
         this.discoReadCount = discoReadCount;
     }
 
-    public Integer getDiscoThroughputMbs() {
-        return discoThroughputMbs;
+    public Integer getDiscoWriteCount() {
+        return discoWriteCount;
     }
 
-    public void setDiscoThroughputMbs(Integer discoThroughputMbs) {
-        this.discoThroughputMbs = discoThroughputMbs;
+    public void setDiscoWriteCount(Integer discoWriteCount) {
+        this.discoWriteCount = discoWriteCount;
     }
 
-    public Integer getDiscoIopsTotal() {
-        return discoIopsTotal;
+    public Double getDiscoLatenciaMs() {
+        return discoLatenciaMs;
     }
 
-    public void setDiscoIopsTotal(Integer discoIopsTotal) {
-        this.discoIopsTotal = discoIopsTotal;
-    }
-
-    public Integer getUsoDiscoTotal() {
-        return usoDiscoTotal;
-    }
-
-    public void setUsoDiscoTotal(Integer usoDiscoTotal) {
-        this.usoDiscoTotal = usoDiscoTotal;
-    }
-
-    public Integer getCpuIoWait() {
-        return cpuIoWait;
-    }
-
-    public void setCpuIoWait(Integer cpuIoWait) {
-        this.cpuIoWait = cpuIoWait;
-    }
-
-    public Integer getTempoCpuOciosa() {
-        return tempoCpuOciosa;
-    }
-
-    public void setTempoCpuOciosa(Integer tempoCpuOciosa) {
-        this.tempoCpuOciosa = tempoCpuOciosa;
-    }
-
-    public Integer getSwapRateMbs() {
-        return swapRateMbs;
-    }
-
-    public void setSwapRateMbs(Integer swapRateMbs) {
-        this.swapRateMbs = swapRateMbs;
-    }
-
-    public Integer getUsoRamTotal() {
-        return usoRamTotal;
-    }
-
-    public void setUsoRamTotal(Integer usoRamTotal) {
-        this.usoRamTotal = usoRamTotal;
-    }
-
-    public Integer getUsoCpuTotal() {
-        return usoCpuTotal;
-    }
-
-    public void setUsoCpuTotal(Integer usoCpuTotal) {
-        this.usoCpuTotal = usoCpuTotal;
-    }
-
-    public String getIdentificaoMainframe() {
-        return identificaoMainframe;
-    }
-
-    public void setIdentificaoMainframe(String identificaoMainframe) {
-        this.identificaoMainframe = identificaoMainframe;
+    public void setDiscoLatenciaMs(Double discoLatenciaMs) {
+        this.discoLatenciaMs = discoLatenciaMs;
     }
 }
