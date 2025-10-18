@@ -1,10 +1,16 @@
+package sptech.school;
+
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
         List<Mainframe> listaLidoMainframe=new ArrayList<>();
@@ -18,11 +24,13 @@ public class Main {
         //listarObjetoMainframe(listaLidoMainframe);
     }
 
-    public static void gravarArquivoCSV(List<Mainframe> listamainframe, List<Processo> listaprocesso,String nomeArq){
+    public static void gravarArquivoCSV(List<Mainframe> listamainframe, List<Processo> listaprocesso, String nomeArq){
         //biblioteca
         OutputStreamWriter saida =null;
-        Boolean falha=false;
+        Boolean falha = false;
         nomeArq+=".csv";
+
+        validarAlerta(listamainframe,listaprocesso);
 
         try{
             saida=new OutputStreamWriter(new FileOutputStream(nomeArq),
@@ -84,8 +92,63 @@ public class Main {
             }
         }
 
+
+
         System.out.println("lendo o arquivo");
 
+    }
+
+    public static void validarAlerta(List<Mainframe> listamainframe, List<Processo> listaprocesso) {
+
+        try (Connection conn = DriverManager.getConnection(
+                Dotenv.load().get("DB_URL"),
+                Dotenv.load().get("DB_USER"),
+                Dotenv.load().get("DB_PASSWORD"))) {
+
+            for (Mainframe mainframe : listamainframe) {
+
+                boolean alert = false;
+                String motivo = "";
+                Double metrica = 0.0;
+
+                String data = mainframe.getTimestamp();
+                String macAdress = mainframe.getMacAdress();
+                Double usoDisco = mainframe.getUsoDiscoTotal();
+                Double usoRam = mainframe.getUsoRamTotal();
+                Double usoCpu = mainframe.getUsoCpuTotal();
+                Double cpuIoWait = mainframe.getCpuIoWait();
+                Double latenciaDisc = mainframe.getDiscoLatenciaMs();
+
+                if (usoDisco >= 80) {
+                    alert = true;
+                    motivo = "Alto uso de disco";
+                    metrica = usoDisco;
+                } else if (usoRam >= 80) {
+                    alert = true;
+                    motivo = "Alto uso de RAM";
+                    metrica = usoRam;
+                } else if (usoCpu >= 80) {
+                    alert = true;
+                    motivo = "Alto uso de CPU";
+                    metrica = usoCpu;
+                } else if (cpuIoWait >= 20) {
+                    alert = true;
+                    motivo = "CPU I/O wait elevado";
+                    metrica = cpuIoWait;
+                } else if (latenciaDisc >= 100) {
+                    alert = true;
+                    motivo = "Alta latência de disco";
+                    metrica = latenciaDisc;
+                }
+
+                if (alert) {
+                    ConnectionDb.inserirAlerta(conn, data, motivo, metrica, macAdress);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao conectar no banco: " + e.getMessage());
+        }
     }
 
     public static void importarArquivoCSVMaquina(String nomeArq,List<Mainframe> listaLido){
@@ -253,10 +316,12 @@ public class Main {
         }
 
     }
+
     public static void listarObjetoMainframe(List<Mainframe> listaLido){
         System.out.println("\nLista lida do arquivo");
         for (Mainframe mainframe:listaLido){
             System.out.println(mainframe);
+
         }
     }
 

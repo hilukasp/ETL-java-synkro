@@ -1,3 +1,5 @@
+package sptech.school;
+
 public class Processo {
     private String timestamp;
     private String macAdress;

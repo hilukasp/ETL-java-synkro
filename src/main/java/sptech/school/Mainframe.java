@@ -1,3 +1,5 @@
+package sptech.school;
+
 public class Mainframe {
     private String macAdress;
     private String timestamp;
