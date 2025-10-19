@@ -14,7 +14,6 @@ public class Processo {
     private String nome7; private double cpu7; private double mem7;
     private String nome8; private double cpu8; private double mem8;
     private String nome9; private double cpu9; private double mem9;
-    private String nome10; private double cpu10; private double mem10;
 
     @Override
     public String toString() {
@@ -49,9 +48,6 @@ public class Processo {
                 ", nome9='" + nome9 + '\'' +
                 ", cpu9=" + cpu9 +
                 ", mem9=" + mem9 +
-                ", nome10='" + nome10 + '\'' +
-                ", cpu10=" + cpu10 +
-                ", mem10=" + mem10 +
                 '}';
     }
 
@@ -293,29 +289,5 @@ public class Processo {
 
     public void setMem9(double mem9) {
         this.mem9 = mem9;
-    }
-
-    public String getNome10() {
-        return nome10;
-    }
-
-    public void setNome10(String nome10) {
-        this.nome10 = nome10;
-    }
-
-    public double getCpu10() {
-        return cpu10;
-    }
-
-    public void setCpu10(double cpu10) {
-        this.cpu10 = cpu10;
-    }
-
-    public double getMem10() {
-        return mem10;
-    }
-
-    public void setMem10(double mem10) {
-        this.mem10 = mem10;
     }
 }
