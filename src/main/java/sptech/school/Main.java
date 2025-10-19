@@ -8,7 +8,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLOutput;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Main {
@@ -17,10 +20,9 @@ public class Main {
         importarArquivoCSVMaquina("dados-mainframe",listaLidoMainframe);
         List<Processo> listaLidoProcesso=new ArrayList<>();
         importarArquivoCSVProcesso("processos",listaLidoProcesso);
-
-        //gravarArquivoCSV(listaLidoMainframe, listaLidoProcesso,"csv-novo");
-        listarObjetoProcesso(listaLidoProcesso);
         gravarArquivoCSV(listaLidoMainframe,listaLidoProcesso,"trusted");
+        validarAlerta(listaLidoMainframe,listaLidoProcesso);
+        listarObjetoProcesso(listaLidoProcesso);
         //listarObjetoMainframe(listaLidoMainframe);
     }
 
@@ -30,7 +32,6 @@ public class Main {
         Boolean falha = false;
         nomeArq+=".csv";
 
-        validarAlerta(listamainframe,listaprocesso);
 
         try{
             saida=new OutputStreamWriter(new FileOutputStream(nomeArq),
@@ -142,6 +143,7 @@ public class Main {
                 }
 
                 if (alert) {
+                    System.out.println("alerta");
                     ConnectionDb.inserirAlerta(conn, data, motivo, metrica, macAdress);
                 }
             }
@@ -167,6 +169,8 @@ public class Main {
         }
 
         try {
+            SimpleDateFormat dtEntrada = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            SimpleDateFormat dtSaida = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String[] registro; //registro é um vetor que armazenará toda as linhas do arquivo
             String linha=entrada.readLine(); //le somenta uma linha inteira
             registro=linha.split(";");
@@ -181,7 +185,9 @@ public class Main {
 
                 try {
                     mainframe.setMacAdress(registro[0]);
-                    mainframe.setTimestamp(registro[1]);
+                    Date date = dtEntrada.parse(registro[1]);
+                    mainframe.setTimestamp(dtSaida.format(date));
+
                     mainframe.setIdentificaoMainframe(registro[2]);
                     mainframe.setUsoCpuTotal(Double.valueOf(registro[3].replace(",", ".")));
                     mainframe.setUsoRamTotal(Double.valueOf(registro[4].replace(",", ".")));
@@ -199,6 +205,9 @@ public class Main {
 
                 }catch (NumberFormatException erro){
                     System.out.println("valor nulo, objeto não foi salvo na lista para evitar irregularidades");
+                } catch (ParseException e) {
+                    System.out.println("data não formatada corretamente");
+                    throw new RuntimeException(e);
                 }
 
                 linha =entrada.readLine();
@@ -248,54 +257,54 @@ public class Main {
 
                 //filtra os dados nulos
                 try {
-                processo.setTimestamp(registro[0]);
-                processo.setMacAdress(registro[1]);
-                processo.setIdentificacaoMainframe(registro[2]);
+                    processo.setTimestamp(registro[0]);
+                    processo.setMacAdress(registro[1]);
+                    processo.setIdentificacaoMainframe(registro[2]);
 
-                //PROCESSOS
-                processo.setNome1(registro[3]);
-                processo.setCpu1(Double.parseDouble(registro[4].replace(",", ".")));
-                processo.setMem1(Double.parseDouble(registro[5].replace(",", ".")));
+                    //processos
+                    processo.setNome1(registro[3]);
+                    processo.setCpu1(Double.parseDouble(registro[4].replace(",", ".")));
+                    processo.setMem1(Double.parseDouble(registro[5].replace(",", ".")));
 
-                processo.setNome2(registro[6]);
-                processo.setCpu2(Double.parseDouble(registro[7].replace(",", ".")));
-                processo.setMem2(Double.parseDouble(registro[8].replace(",", ".")));
+                    processo.setNome2(registro[6]);
+                    processo.setCpu2(Double.parseDouble(registro[7].replace(",", ".")));
+                    processo.setMem2(Double.parseDouble(registro[8].replace(",", ".")));
 
-                processo.setNome3(registro[9]);
-                processo.setCpu3(Double.parseDouble(registro[10].replace(",", ".")));
-                processo.setMem3(Double.parseDouble(registro[11].replace(",", ".")));
+                    processo.setNome3(registro[9]);
+                    processo.setCpu3(Double.parseDouble(registro[10].replace(",", ".")));
+                    processo.setMem3(Double.parseDouble(registro[11].replace(",", ".")));
 
-                processo.setNome4(registro[12]);
-                processo.setCpu4(Double.parseDouble(registro[13].replace(",", ".")));
-                processo.setMem4(Double.parseDouble(registro[14].replace(",", ".")));
+                    processo.setNome4(registro[12]);
+                    processo.setCpu4(Double.parseDouble(registro[13].replace(",", ".")));
+                    processo.setMem4(Double.parseDouble(registro[14].replace(",", ".")));
 
-                processo.setNome5(registro[15]);
-                processo.setCpu5(Double.parseDouble(registro[16].replace(",", ".")));
-                processo.setMem5(Double.parseDouble(registro[17].replace(",", ".")));
+                    processo.setNome5(registro[15]);
+                    processo.setCpu5(Double.parseDouble(registro[16].replace(",", ".")));
+                    processo.setMem5(Double.parseDouble(registro[17].replace(",", ".")));
 
-                processo.setNome6(registro[18]);
-                processo.setCpu6(Double.parseDouble(registro[19].replace(",", ".")));
-                processo.setMem6(Double.parseDouble(registro[20].replace(",", ".")));
+                    processo.setNome6(registro[18]);
+                    processo.setCpu6(Double.parseDouble(registro[19].replace(",", ".")));
+                    processo.setMem6(Double.parseDouble(registro[20].replace(",", ".")));
 
-                processo.setNome7(registro[21]);
-                processo.setCpu7(Double.parseDouble(registro[22].replace(",", ".")));
-                processo.setMem7(Double.parseDouble(registro[23].replace(",", ".")));
+                    processo.setNome7(registro[21]);
+                    processo.setCpu7(Double.parseDouble(registro[22].replace(",", ".")));
+                    processo.setMem7(Double.parseDouble(registro[23].replace(",", ".")));
 
-                processo.setNome8(registro[24]);
-                processo.setCpu8(Double.parseDouble(registro[25].replace(",", ".")));
-                processo.setMem8(Double.parseDouble(registro[26].replace(",", ".")));
+                    processo.setNome8(registro[24]);
+                    processo.setCpu8(Double.parseDouble(registro[25].replace(",", ".")));
+                    processo.setMem8(Double.parseDouble(registro[26].replace(",", ".")));
 
-                processo.setNome9(registro[27]);
-                processo.setCpu9(Double.parseDouble(registro[28].replace(",", ".")));
-                processo.setMem9(Double.parseDouble(registro[29].replace(",", ".")));
+                    processo.setNome9(registro[27]);
+                    processo.setCpu9(Double.parseDouble(registro[28].replace(",", ".")));
+                    processo.setMem9(Double.parseDouble(registro[29].replace(",", ".")));
 
-                processo.setNome10(registro[30]);
-                processo.setCpu10(Double.parseDouble(registro[31].replace(",", ".")));
-                processo.setMem10(Double.parseDouble(registro[32].replace(",", ".")));
+                    processo.setNome10(registro[30]);
+                    processo.setCpu10(Double.parseDouble(registro[31].replace(",", ".")));
+                    processo.setMem10(Double.parseDouble(registro[32].replace(",", ".")));
 
-                //System.out.printf("%1s %16s %20s %20s %20s %20s %20s %20s %20s %20s %20s %20s %20s\n",registro[0],registro[1],registro[2],registro[3],registro[4],registro[5],registro[6],registro[7],registro[8],registro[9],registro[10],registro[11],registro[12]);
+                    //System.out.printf("%1s %16s %20s %20s %20s %20s %20s %20s %20s %20s %20s %20s %20s\n",registro[0],registro[1],registro[2],registro[3],registro[4],registro[5],registro[6],registro[7],registro[8],registro[9],registro[10],registro[11],registro[12]);
 
-                listaLidoProcesso.add(processo);
+                    listaLidoProcesso.add(processo);
                 }catch (NumberFormatException erro){
                     //System.out.println("valor nulo, objeto não foi salvo na lista para evitar irregularidades");
                 }

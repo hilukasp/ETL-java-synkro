@@ -26,7 +26,8 @@ public class ConnectionDb {
                                      String dtHora,
                                      String descricao,
                                      Double valorColetado,
-                                     String macAdress) {
+                                     String macAdress
+                                     ) {
 
         String sql = """
             INSERT INTO alerta (dt_hora, descricao, valor_coletado, fkMainframe)
