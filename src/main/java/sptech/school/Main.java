@@ -17,8 +17,8 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         List<Mainframe> listaLidoMainframe=new ArrayList<>();
-        importarArquivoCSVMaquina("dados-mainframe",listaLidoMainframe);
         List<Processo> listaLidoProcesso=new ArrayList<>();
+        importarArquivoCSVMaquina("dados-mainframe",listaLidoMainframe);
         importarArquivoCSVProcesso("processos",listaLidoProcesso);
         gravarArquivoCSV(listaLidoMainframe,listaLidoProcesso,"trusted");
 //        validarAlerta(listaLidoMainframe,listaLidoProcesso);
