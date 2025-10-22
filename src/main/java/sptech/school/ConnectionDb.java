@@ -31,7 +31,7 @@ public class ConnectionDb {
 
         String sql = """
             INSERT INTO alerta (dt_hora, descricao, valor_coletado, fkMainframe)
-            VALUES (?, ?, ?, (SELECT id FROM mainframe WHERE numeroDeSerie = ?))
+            VALUES (?, ?, ?, (SELECT id FROM mainframe WHERE macAdress = ?))
             """;
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {

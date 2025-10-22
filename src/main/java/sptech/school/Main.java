@@ -21,8 +21,8 @@ public class Main {
         importarArquivoCSVMaquina("dados-mainframe",listaLidoMainframe);
         importarArquivoCSVProcesso("processos",listaLidoProcesso);
         gravarArquivoCSV(listaLidoMainframe,listaLidoProcesso,"trusted");
-//        validarAlerta(listaLidoMainframe,listaLidoProcesso);
-        listarObjetoProcesso(listaLidoProcesso);
+     validarAlerta(listaLidoMainframe,listaLidoProcesso);
+//        listarObjetoProcesso(listaLidoProcesso);
         //listarObjetoMainframe(listaLidoMainframe);
     }
 
