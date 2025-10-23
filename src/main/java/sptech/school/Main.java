@@ -21,8 +21,8 @@ public class Main {
         importarArquivoCSVMaquina("dados-mainframe",listaLidoMainframe);
         importarArquivoCSVProcesso("processos",listaLidoProcesso);
         gravarArquivoCSV(listaLidoMainframe,listaLidoProcesso,"trusted");
-     validarAlerta(listaLidoMainframe,listaLidoProcesso);
-//        listarObjetoProcesso(listaLidoProcesso);
+        validarAlerta(listaLidoMainframe,listaLidoProcesso);
+        //listarObjetoProcesso(listaLidoProcesso);
         //listarObjetoMainframe(listaLidoMainframe);
     }
 
@@ -225,7 +225,6 @@ public class Main {
         }
 
     }
-
     public static void importarArquivoCSVProcesso(String nomeArq,List<Processo> listaLidoProcesso){
         Reader arq = null; //arq eh o objeto que corresponde o arquivo
         BufferedReader entrada =null; //entrada eh o objeto usado para ler do arquivo
@@ -322,6 +321,7 @@ public class Main {
 
     }
 
+
     public static void listarObjetoMainframe(List<Mainframe> listaLido){
         System.out.println("\nLista lida do arquivo");
         for (Mainframe mainframe:listaLido){
@@ -329,11 +329,13 @@ public class Main {
 
         }
     }
-
     public static void listarObjetoProcesso(List<Processo> listaLido){
         System.out.println("\nLista lida do arquivo");
         for (Processo processo:listaLido){
             System.out.println(processo);
         }
     }
+
+
+
 }
