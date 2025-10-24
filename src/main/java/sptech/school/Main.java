@@ -22,9 +22,66 @@ public class Main {
         importarArquivoCSVProcesso("processos",listaLidoProcesso);
         gravarArquivoCSV(listaLidoMainframe,listaLidoProcesso,"trusted");
         validarAlerta(listaLidoMainframe,listaLidoProcesso);
-        //listarObjetoProcesso(listaLidoProcesso);
+         //listarObjetoProcesso(listaLidoProcesso);
         //listarObjetoMainframe(listaLidoMainframe);
     }
+    public static void validarAlerta(List<Mainframe> listamainframe, List<Processo> listaprocesso) {
+        try (Connection conn = DriverManager.getConnection(
+                Dotenv.load().get("DB_URL"),
+                Dotenv.load().get("DB_USER"),
+                Dotenv.load().get("DB_PASSWORD"))) {
+
+            for (Mainframe mainframe : listamainframe) {
+                String data = mainframe.getTimestamp();
+                String macAdress = mainframe.getMacAdress();
+
+                double usoDisco = mainframe.getUsoDiscoTotal();
+                double usoRam = mainframe.getUsoRamTotal();
+                double usoCpu = mainframe.getUsoCpuTotal();
+                double cpuOciosa = mainframe.getTempoCpuOciosa();
+                double cpuIoWait = mainframe.getCpuIoWait();
+                double swapRate = mainframe.getSwapRateMbs();
+                double throughput = mainframe.getDiscoThroughputMbs();
+                double discIops = mainframe.getDiscoIopsTotal();
+                double read = mainframe.getDiscoReadCount().doubleValue();
+                double write = mainframe.getDiscoWriteCount().doubleValue();
+                double latenciaDisc = mainframe.getDiscoLatenciaMs();
+
+                List<List<Object>> componentes = ConnectionDb.buscarMetricas(conn, macAdress);
+
+                for (List<Object> c : componentes) {
+                    int fkcomp = (Integer) c.get(0);
+                    double min = (Double) c.get(1);
+                    double max = (Double) c.get(2);
+
+                    double valor = switch (fkcomp) {
+                        case 1 -> usoCpu;
+                        case 2 -> usoRam;
+                        case 3 -> usoDisco;
+                        case 4 -> swapRate;
+                        case 5 -> cpuOciosa;
+                        case 6 -> cpuIoWait;
+                        case 7 -> throughput;
+                        case 8 -> discIops;
+                        case 9 -> read;
+                        case 10 -> write;
+                        case 11 -> latenciaDisc;
+                        default -> 0;
+                    };
+
+                    if (valor < min || valor > max) {
+                        System.out.println(" Alerta Componente " + fkcomp + " fora dos limites");
+                        ConnectionDb.inserirAlerta(conn, data, fkcomp, valor, macAdress);
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao conectar no banco: " + e.getMessage());
+        }
+    }
+
+
 
     public static void gravarArquivoCSV(List<Mainframe> listamainframe, List<Processo> listaprocesso, String nomeArq){
         //biblioteca
@@ -97,61 +154,6 @@ public class Main {
         System.out.println("lendo o arquivo");
 
     }
-
-    public static void validarAlerta(List<Mainframe> listamainframe, List<Processo> listaprocesso) {
-
-        try (Connection conn = DriverManager.getConnection(
-                Dotenv.load().get("DB_URL"),
-                Dotenv.load().get("DB_USER"),
-                Dotenv.load().get("DB_PASSWORD"))) {
-
-            for (Mainframe mainframe : listamainframe) {
-
-                boolean alert = false;
-                String motivo = "";
-                Double metrica = 0.0;
-
-                String data = mainframe.getTimestamp();
-                String macAdress = mainframe.getMacAdress();
-                Double usoDisco = mainframe.getUsoDiscoTotal();
-                Double usoRam = mainframe.getUsoRamTotal();
-                Double usoCpu = mainframe.getUsoCpuTotal();
-                Double cpuIoWait = mainframe.getCpuIoWait();
-                Double latenciaDisc = mainframe.getDiscoLatenciaMs();
-
-                if (usoDisco >= 80) {
-                    alert = true;
-                    motivo = "Alto uso de disco";
-                    metrica = usoDisco;
-                } else if (usoRam >= 80) {
-                    alert = true;
-                    motivo = "Alto uso de RAM";
-                    metrica = usoRam;
-                } else if (usoCpu >= 80) {
-                    alert = true;
-                    motivo = "Alto uso de CPU";
-                    metrica = usoCpu;
-                } else if (cpuIoWait >= 20) {
-                    alert = true;
-                    motivo = "CPU I/O wait elevado";
-                    metrica = cpuIoWait;
-                } else if (latenciaDisc >= 100) {
-                    alert = true;
-                    motivo = "Alta latência de disco";
-                    metrica = latenciaDisc;
-                }
-
-                if (alert) {
-                    System.out.println("alerta");
-                    ConnectionDb.inserirAlerta(conn, data, motivo, metrica, macAdress);
-                }
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Erro ao conectar no banco: " + e.getMessage());
-        }
-    }
-
     public static void importarArquivoCSVMaquina(String nomeArq,List<Mainframe> listaLido){
         Reader arq = null; //arq eh o objeto que corresponde o arquivo
         BufferedReader entrada =null; //entrada eh o objeto usado para ler do arquivo
