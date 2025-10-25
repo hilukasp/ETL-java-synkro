@@ -53,6 +53,7 @@ public class Main {
                     int fkcomp = (Integer) c.get(0);
                     double min = (Double) c.get(1);
                     double max = (Double) c.get(2);
+                    String nomecomponente=(String) c.get(3);
 
                     double valor = switch (fkcomp) {
                         case 1 -> usoCpu;
@@ -71,7 +72,7 @@ public class Main {
 
                     if (valor < min || valor > max) {
                         System.out.println(" Alerta Componente " + fkcomp + " fora dos limites");
-                        ConnectionDb.inserirAlerta(conn, data, fkcomp, valor, macAdress);
+                        ConnectionDb.inserirAlerta(conn, data, fkcomp, valor, macAdress,nomecomponente);
                     }
                 }
             }

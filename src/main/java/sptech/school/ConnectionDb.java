@@ -2,9 +2,11 @@ package sptech.school;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import static sptech.school.JiraIntegration.abrirChamado;
 
 public class ConnectionDb {
     public static void main(String[] args) {
@@ -26,7 +28,7 @@ public class ConnectionDb {
     }
 
     public static void inserirAlerta(@org.jetbrains.annotations.NotNull Connection conn,
-                                     String dtHora, Integer fkComponente, Object valorColetado, String macAdress) {
+                                     String dtHora, Integer fkComponente, Object valorColetado, String macAdress,String nomecomponente) {
 
         String sql = """
                 INSERT INTO alerta (dt_hora, fkComponente, valor_coletado, fkMainframe)
@@ -41,10 +43,15 @@ public class ConnectionDb {
 
             stmt.executeUpdate();
             System.out.println(" Alerta inserido");
+            abrirChamado("ERRO no "+nomecomponente,"alerta de: "+valorColetado);
 
         } catch (SQLException e) {
             System.err.println(" Erro ao inserir alerta: " + e.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
+
     }
 
 
@@ -54,7 +61,7 @@ public class ConnectionDb {
 
 
         String sql = """
-                SELECT fkcomponente,min,max FROM componente_mainframe cm
+                SELECT fkcomponente,min,max,nome FROM componente_mainframe cm
                 JOIN componente cp ON cm.fkcomponente = cp.id
                 JOIN metrica mt ON cp.fkMetrica = mt.id
                 WHERE fkMainframe = (SELECT id FROM mainframe WHERE macAdress = ?) and\s
@@ -71,11 +78,13 @@ public class ConnectionDb {
                     Integer componente = rs.getInt("fkcomponente");
                     Double min = rs.getDouble("min");
                     Double max = rs.getDouble("max");
+                    String nome=rs.getString("nome");
 
                     List<Object> comp_met = new ArrayList<>();
                     comp_met.add(componente);
                     comp_met.add(min);
                     comp_met.add(max);
+                    comp_met.add(nome);
 
                     allComponentes.add(comp_met);
 
