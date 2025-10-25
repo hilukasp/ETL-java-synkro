@@ -61,11 +61,12 @@ public class ConnectionDb {
 
 
         String sql = """
-                SELECT fkcomponente,min,max,nome FROM componente_mainframe cm
-                JOIN componente cp ON cm.fkcomponente = cp.id
-                JOIN metrica mt ON cp.fkMetrica = mt.id
-                WHERE fkMainframe = (SELECT id FROM mainframe WHERE macAdress = ?) and\s
-                cp.captura = 1;
+                SELECT cp.fkComponente , m.min, m.max,cp2.nome
+                from componente_mainframe as cp
+                JOIN metrica m on m.id = cp.fkMetrica and m.fkComponente = cp.fkComponente\s
+                join tipo t on m.fkTipo = t.id
+                join componente cp2 on cp.fkComponente=cp2.id
+                WHERE fkMainframe = (SELECT id FROM mainframe WHERE macAdress = ?) ;
                 """;
 
 
