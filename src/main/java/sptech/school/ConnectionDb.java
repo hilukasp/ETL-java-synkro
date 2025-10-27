@@ -1,6 +1,7 @@
 package sptech.school;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.sql.*;
@@ -27,75 +28,59 @@ public class ConnectionDb {
 
     }
 
-    public static void inserirAlerta(@org.jetbrains.annotations.NotNull Connection conn,
-                                     String dtHora, Integer fkComponente, Object valorColetado, String macAdress,String nomecomponente) {
-
+    public static void inserirAlerta(@NotNull Connection conn,
+                                     String dtHora, Integer fkComponente, Object valorColetado,
+                                     String macAdress, String nomecomponente) {
         String sql = """
-                INSERT INTO alerta (dt_hora, fkComponente, valor_coletado, fkMainframe)
-                VALUES (?, ?, ?, (SELECT id FROM mainframe WHERE macAdress = ?))
-                """;
+            INSERT INTO alerta (dt_hora, fkComponente, valor_coletado, fkMainframe, fkGravidade, fkStatus, fkMetrica)
+            VALUES (?, ?, ?, 
+                    (SELECT id FROM mainframe WHERE macAdress = ?),
+                    1, 1, ?)
+            """;
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, dtHora);
             stmt.setInt(2, fkComponente);
             stmt.setObject(3, valorColetado);
             stmt.setString(4, macAdress);
+            stmt.setInt(5, fkComponente); // fkMetrica = mesmo ID da métrica usada na validação
 
             stmt.executeUpdate();
-            System.out.println(" Alerta inserido");
-            abrirChamado("ERRO no "+nomecomponente,"alerta de: "+valorColetado);
+            System.out.println("Alerta inserido para " + nomecomponente);
+            abrirChamado("ERRO no " + nomecomponente,
+                    "Alerta de: " + valorColetado);
 
         } catch (SQLException e) {
-            System.err.println(" Erro ao inserir alerta: " + e.getMessage());
+            System.err.println("Erro ao inserir alerta: " + e.getMessage());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
 
-    public static List<List<Object>> buscarMetricas(@org.jetbrains.annotations.NotNull Connection conn, String macAdress) {
-
-        List<List<Object>> allComponentes = new ArrayList<>();
-
-
+    public static List<List<Object>> buscarMetricas(Connection conn, String macAdress) throws SQLException {
         String sql = """
-                SELECT cp.fkComponente , m.min, m.max,cp2.nome
-                from componente_mainframe as cp
-                JOIN metrica m on m.id = cp.fkMetrica and m.fkComponente = cp.fkComponente\s
-                join tipo t on m.fkTipo = t.id
-                join componente cp2 on cp.fkComponente=cp2.id
-                WHERE fkMainframe = (SELECT id FROM mainframe WHERE macAdress = ?) ;
-                """;
+        SELECT cm.fkComponente, m.min, m.max, c.nome
+        FROM componente_mainframe cm
+        JOIN metrica m ON m.id = cm.fkMetrica AND m.fkComponente = cm.fkComponente
+        JOIN componente c ON c.id = cm.fkComponente
+        JOIN mainframe mf ON mf.id = cm.fkMainframe
+        WHERE mf.macAdress = ?
+        """;
 
-
+        List<List<Object>> lista = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, macAdress);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-
-                    Integer componente = rs.getInt("fkcomponente");
-                    Double min = rs.getDouble("min");
-                    Double max = rs.getDouble("max");
-                    String nome=rs.getString("nome");
-
-                    List<Object> comp_met = new ArrayList<>();
-                    comp_met.add(componente);
-                    comp_met.add(min);
-                    comp_met.add(max);
-                    comp_met.add(nome);
-
-                    allComponentes.add(comp_met);
-
-                }
-                return allComponentes;
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                lista.add(List.of(
+                        rs.getInt("fkComponente"),
+                        rs.getDouble("min"),
+                        rs.getDouble("max"),
+                        rs.getString("nome")
+                ));
             }
-        } catch (SQLException e) {
-            System.err.println("Erro ao buscar alertas: " + e.getMessage());
-            return null;
         }
+        return lista;
     }
-
 }
