@@ -14,6 +14,10 @@ public class ConnectionAws {
     private static final Region REGION = Region.US_EAST_1;
     private static S3Client s3;
 
+    private static final List<String> BUCKETS_RAW = new ArrayList<>();
+    private static final List<String> BUCKETS_TRUSTED = new ArrayList<>();
+    private static final List<String> BUCKETS_CLIENT = new ArrayList<>();
+
     static {
         s3 = S3Client.builder()
                 .region(REGION)
@@ -76,5 +80,43 @@ public class ConnectionAws {
             }
         }
         throw new RuntimeException("Bucket do tipo " + tipo + " não encontrado!");
+    }
+
+    // 🔹 Lista todos os buckets da conta
+    public static List<String> pegarBucketsS3() {
+        List<String> buckets = new ArrayList<>();
+        try {
+            ListBucketsResponse response = s3.listBuckets();
+            for (Bucket b : response.buckets()) {
+                buckets.add(b.name());
+            }
+        } catch (S3Exception e) {
+            System.out.println("Erro ao listar buckets: " + e.awsErrorDetails().errorMessage());
+        }
+        return buckets;
+    }
+
+    // 🔹 Método principal para testar a conexão e categorizar os buckets
+    public static void main(String[] args) {
+        try {
+            System.out.println("Conectando à AWS S3...");
+            List<String> buckets = pegarBucketsS3();
+
+            System.out.println("Buckets encontrados:");
+            for (String b : buckets) {
+                System.out.println(" - " + b);
+                String nome = b.toLowerCase();
+                if (nome.contains("raw")) BUCKETS_RAW.add(b);
+                else if (nome.contains("trusted")) BUCKETS_TRUSTED.add(b);
+                else if (nome.contains("client")) BUCKETS_CLIENT.add(b);
+            }
+
+            System.out.println("\nBuckets RAW: " + BUCKETS_RAW);
+            System.out.println("Buckets TRUSTED: " + BUCKETS_TRUSTED);
+            System.out.println("Buckets CLIENT: " + BUCKETS_CLIENT);
+
+        } catch (Exception e) {
+            System.out.println("Erro ao conectar ou listar buckets: " + e.getMessage());
+        }
     }
 }
