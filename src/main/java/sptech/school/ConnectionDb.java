@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
 import static sptech.school.JiraIntegration.abrirChamado;
 
 public class ConnectionDb {
@@ -18,17 +19,17 @@ public class ConnectionDb {
         String user = dotenv.get("DB_USER");
         String password = dotenv.get("DB_PASSWORD");
 
-        // Conectar ao banco
         try (Connection conn = DriverManager.getConnection(url, user, password)) {
-            System.out.println("Conexão estabelecida com sucesso!");
+            System.out.println("Conexão estabelecida com sucesso! \n");
         } catch (SQLException e) {
             System.err.println("Erro na conexão: " + e.getMessage());
         }
     }
 
+    // 🔹 Insere alerta e abre chamado no Jira
     public static void inserirAlerta(@NotNull Connection conn,
                                      String dtHora, Integer fkComponente, Object valorColetado,
-                                     String macAdress, String nomecomponente) {
+                                     String macAdress, String nomeComponente) {
         String sql = """
             INSERT INTO alerta (dt_hora, fkComponente, valor_coletado, fkMainframe, fkGravidade, fkStatus, fkMetrica)
             VALUES (?, ?, ?, 
@@ -41,12 +42,13 @@ public class ConnectionDb {
             stmt.setInt(2, fkComponente);
             stmt.setObject(3, valorColetado);
             stmt.setString(4, macAdress);
-            stmt.setInt(5, fkComponente); // fkMetrica = mesmo ID da métrica usada na validação
+            stmt.setInt(5, fkComponente);
 
             stmt.executeUpdate();
-            System.out.println("Alerta inserido para " + nomecomponente);
-            abrirChamado("ERRO no " + nomecomponente,
-                    "Alerta de: " + valorColetado);
+
+            System.out.println("⚠️ Alerta inserido para " + nomeComponente);
+            abrirChamado("ERRO no " + nomeComponente,
+                    "Valor fora do limite: " + valorColetado);
 
         } catch (SQLException e) {
             System.err.println("Erro ao inserir alerta: " + e.getMessage());
@@ -55,6 +57,7 @@ public class ConnectionDb {
         }
     }
 
+    // 🔹 Busca métricas configuradas para um mainframe
     public static List<List<Object>> buscarMetricas(Connection conn, String macAdress) throws SQLException {
         String sql = """
         SELECT cm.fkComponente, m.min, m.max, c.nome
@@ -66,9 +69,11 @@ public class ConnectionDb {
         """;
 
         List<List<Object>> lista = new ArrayList<>();
+
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, macAdress);
             ResultSet rs = stmt.executeQuery();
+
             while (rs.next()) {
                 lista.add(List.of(
                         rs.getInt("fkComponente"),

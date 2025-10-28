@@ -88,7 +88,8 @@ public class Main {
         }
     }
 
-    // 🔹 Importa dados de Mainframe a partir da lista em memória
+    // 🔹
+
     public static void importarArquivoCSVMaquinaMemoria(List<String[]> dados, List<Mainframe> listaLido) {
         try {
             SimpleDateFormat dtEntrada = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
@@ -141,7 +142,7 @@ public class Main {
                     processo.setMem1(Double.parseDouble(registro[8].replace(",", ".")));
                     listaLidoProcesso.add(processo);
                 } catch (NumberFormatException erro) {
-                    System.out.println("Linha ignorada no processo por erro de número.");
+                    System.out.println("Erro import");
                 }
             }
         } catch (Exception e) {
