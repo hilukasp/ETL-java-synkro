@@ -8,7 +8,7 @@ import java.util.Base64;
 import io.github.cdimascio.dotenv.Dotenv;
 
 
-public class JiraIntegration {
+public class IntegracaoJira {
     public static void main(String[] args) throws IOException {
         String summary="teste";
         String description="descicao";

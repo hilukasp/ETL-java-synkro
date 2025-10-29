@@ -8,9 +8,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static sptech.school.JiraIntegration.abrirChamado;
+import static sptech.school.IntegracaoJira.abrirChamado;
 
-public class ConnectionDb {
+public class ConnexaoBd {
 
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.load();
