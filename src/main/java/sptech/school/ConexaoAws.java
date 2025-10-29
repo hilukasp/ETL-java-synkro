@@ -9,7 +9,7 @@ import software.amazon.awssdk.services.s3.model.*;
 import java.io.*;
 import java.util.*;
 
-public class ConnexaoAws {
+public class ConexaoAws {
 
     private static final Region REGION = Region.US_EAST_1;
     private static final S3Client s3 = S3Client.builder()

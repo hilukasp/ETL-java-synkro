@@ -10,7 +10,7 @@ import java.util.List;
 
 import static sptech.school.IntegracaoJira.abrirChamado;
 
-public class ConnexaoBd {
+public class ConexaoBd {
 
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.load();

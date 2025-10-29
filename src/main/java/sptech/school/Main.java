@@ -16,15 +16,15 @@ public class Main {
         List<Processo> listaLidoProcesso = new ArrayList<>();
 
         // 🔹 Baixa e trata os CSVs do bucket RAW direto da AWS
-        List<String[]> dadosMainframe = ConnexaoAws.lerArquivoCsvDoRaw("dados-mainframe.csv");
-        List<String[]> dadosProcesso = ConnexaoAws.lerArquivoCsvDoRaw("processos.csv");
+        List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw("dados-mainframe.csv");
+        List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw("processos.csv");
 
         importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe);
         importarArquivoCSVProcessoMemoria(dadosProcesso, listaLidoProcesso);
 
         // 🔹 Gera CSV tratado e envia pro bucket TRUSTED
         String csvTratado = gerarCsvTrusted(listaLidoMainframe, listaLidoProcesso);
-        ConnexaoAws.enviarCsvTrusted("trusted.csv", csvTratado);
+        ConexaoAws.enviarCsvTrusted("trusted.csv", csvTratado);
 
         // 🔹 Valida alertas no Synkro
         validarAlerta(listaLidoMainframe, listaLidoProcesso);
@@ -57,7 +57,7 @@ public class Main {
                 int countOc = 0, countWait = 0, countThru = 0, countIops = 0;
                 int countRead = 0, countWrite = 0, countLat = 0;
 
-                List<List<Object>> componentes = ConnexaoBd.buscarMetricas(conn, macAdress);
+                List<List<Object>> componentes = ConexaoBd.buscarMetricas(conn, macAdress);
 
                 for (List<Object> c : componentes) {
                     int fkcomp = (Integer) c.get(0);
@@ -184,7 +184,7 @@ public class Main {
 
                     if (gerarAlerta) {
                         System.out.println(" Alerta: Componente " + fkcomp + " fora dos limites");
-                        ConnexaoBd.inserirAlerta(conn, data, fkcomp, valor, macAdress, nomecomponente);
+                        ConexaoBd.inserirAlerta(conn, data, fkcomp, valor, macAdress, nomecomponente);
                     }
                 }
             }
