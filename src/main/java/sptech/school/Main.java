@@ -35,6 +35,9 @@ public class Main {
                 Dotenv.load().get("DB_URL"),
                 Dotenv.load().get("DB_USER"),
                 Dotenv.load().get("DB_PASSWORD"))) {
+            int countCpu = 0, countRam = 0, countDisco = 0, countSwap = 0;
+            int countOc = 0, countWait = 0, countThru = 0, countIops = 0;
+            int countRead = 0, countWrite = 0, countLat = 0;
 
             for (Mainframe mainframe : listamainframe) {
                 String data = mainframe.getTimestamp();
@@ -52,10 +55,6 @@ public class Main {
                 double write = mainframe.getDiscoWriteCount().doubleValue();
                 double latenciaDisc = mainframe.getDiscoLatenciaMs();
 
-                // Contadores
-                int countCpu = 0, countRam = 0, countDisco = 0, countSwap = 0;
-                int countOc = 0, countWait = 0, countThru = 0, countIops = 0;
-                int countRead = 0, countWrite = 0, countLat = 0;
 
                 List<List<Object>> componentes = ConexaoBd.buscarMetricas(conn, macAdress);
 
@@ -65,23 +64,25 @@ public class Main {
                     Double max = (Double) c.get(2);
                     String nomecomponente = (String) c.get(3);
                     Integer qtdIncidencias = 5;
-                    double valor = 0;
-
+                    Double valor = 0.0;
+                    String metrica = "";
                     boolean gerarAlerta = false;
 
                     switch (fkcomp) {
                         case 1:
                             valor = usoCpu;
+                            metrica = "Uso CPU";
                             if (valor < min || valor > max) {
                                 countCpu++;
                                 if (countCpu >= qtdIncidencias) {
                                     gerarAlerta = true;
                                     countCpu = 0;
-                                }
+                                     }
                                 break;
                             }
                         case 2:
                             valor = usoRam;
+                            metrica = "Uso RAM";
                             if (valor < min || valor > max) countRam++;
                         {
                             if (countRam >= qtdIncidencias) {
@@ -92,16 +93,19 @@ public class Main {
                         }
                         case 3:
                             valor = usoDisco;
+                            metrica = "Uso Disco";
                             if (valor < min || valor > max) {
                                 countDisco++;
                                 if (countDisco >= qtdIncidencias) {
                                     gerarAlerta = true;
                                     countDisco = 0;
+
                                 }
                                 break;
                             }
                         case 4:
                             valor = swapRate;
+                            metrica = "Swap Rate";
                             if (valor < min || valor > max) {
                                 countSwap++;
                                 if (countSwap >= qtdIncidencias) {
@@ -112,6 +116,7 @@ public class Main {
                             }
                         case 5:
                             valor = cpuOciosa;
+                            metrica = "CPU Ociosa";
                             if (valor < min || valor > max) {
                                 countOc++;
                                 if (countOc >= qtdIncidencias) {
@@ -122,6 +127,7 @@ public class Main {
                             }
                         case 6:
                             valor = cpuIoWait;
+                            metrica = "CPU IO Wait";
                             if (valor < min || valor > max) {
                                 countWait++;
                                 if (countWait >= qtdIncidencias) {
@@ -132,6 +138,7 @@ public class Main {
                             }
                         case 7:
                             valor = throughput;
+                            metrica = "Throughput";
                             if (valor < min || valor > max) {
                                 countThru++;
                                 if (countThru >= qtdIncidencias) {
@@ -142,6 +149,7 @@ public class Main {
                             }
                         case 8:
                             valor = discIops;
+                            metrica = "Disco IOps";
                             if (valor < min || valor > max) {
                                 countIops++;
                                 if (countIops >= qtdIncidencias) {
@@ -152,6 +160,7 @@ public class Main {
                             }
                         case 9:
                             valor = read;
+                            metrica = "Leitura do Disco";
                             if (valor < min || valor > max) {
                                 countRead++;
                                 if (countRead >= qtdIncidencias) {
@@ -162,6 +171,7 @@ public class Main {
                             }
                         case 10:
                             valor = write;
+                            metrica = "Escrita do Disco";
                             if (valor < min || valor > max) {
                                 countWrite++;
                                 if (countWrite >= qtdIncidencias) {
@@ -172,6 +182,7 @@ public class Main {
                             }
                         case 11:
                             valor = latenciaDisc;
+                            metrica = "Latência do Disco";
                             if (valor < min || valor > max) {
                                 countLat++;
                                 if (countLat >= qtdIncidencias) {
@@ -183,8 +194,8 @@ public class Main {
                     }
 
                     if (gerarAlerta) {
-                        System.out.println(" Alerta: Componente " + fkcomp + " fora dos limites");
-                        ConexaoBd.inserirAlerta(conn, data, fkcomp, valor, macAdress, nomecomponente);
+                        //System.out.println(" Alerta: Componente " + fkcomp + " fora dos limites");
+ ConexaoBd.inserirAlerta(conn, data, fkcomp, valor, macAdress, nomecomponente,metrica);
                     }
                 }
             }
@@ -309,8 +320,6 @@ public class Main {
 
         for(Processo processo:listaprocesso){
             for(Mainframe mainframe:listamainframe){
-                System.out.println("");
-
                 if (mainframe.getTimestamp().equals(processo.getTimestamp())){
 
                     sb.append(String.format(

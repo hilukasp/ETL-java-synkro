@@ -47,11 +47,16 @@ public class IntegracaoJira {
 
     public static boolean chamadoaberto=false;
     public static void abrirChamado(String summary, String description) throws IOException {
-        if(!chamadoaberto) {
+
+            if (!chamadoaberto){
+
+            System.out.println("chamado aberto");
             Dotenv dotenv = Dotenv.load();
             String jiraUrl = dotenv.get("JIRA_URL");
             String email = dotenv.get("JIRA_EMAIL");
             String apiToken = dotenv.get("API_JIRA");
+        System.out.println(description);
+        System.out.println(summary);
 
             String auth = Base64.getEncoder().encodeToString((email + ":" + apiToken).getBytes());
 
@@ -65,20 +70,21 @@ public class IntegracaoJira {
                     + "}";
 
             URL url = new URL(jiraUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Authorization", "Basic " + auth);
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setDoOutput(true);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Authorization", "Basic " + auth);
+            con.setRequestProperty("Accept", "application/json");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setDoOutput(true);
 
-            try (OutputStream os = conn.getOutputStream()) {
+            try (OutputStream os = con.getOutputStream()) {
                 os.write(json.getBytes());
             }
 
-            if (conn.getResponseCode() != 201) {
-                System.out.println("Erro ao criar chamado: " + conn.getResponseCode());
+            if (con.getResponseCode() != 201) {
+                System.out.println("Erro ao criar chamado: " + con.getResponseCode());
             }
+
             chamadoaberto=true;
         }
     }
