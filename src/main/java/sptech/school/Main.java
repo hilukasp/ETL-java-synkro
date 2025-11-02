@@ -99,7 +99,6 @@ public class Main {
                                 if (countDisco >= qtdIncidencias) {
                                     gerarAlerta = true;
                                     countDisco = 0;
-
                                 }
                                 break;
                             }
