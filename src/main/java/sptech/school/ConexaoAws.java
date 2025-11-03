@@ -21,7 +21,7 @@ public class ConexaoAws {
     private static final List<String> BUCKETS_TRUSTED = new ArrayList<>();
     private static final List<String> BUCKETS_CLIENT = new ArrayList<>();
 
-    // 🔹 Lê um CSV do bucket RAW e devolve como lista de linhas
+    //Lê um CSV do bucket RAW e devolve como lista de linhas
     public static List<String[]> lerArquivoCsvDoRaw(String nomeArquivo) {
         List<String[]> linhas = new ArrayList<>();
         String bucketRaw = pegarBucket("raw");
@@ -41,16 +41,16 @@ public class ConexaoAws {
                 }
             }
 
-            System.out.println(" Arquivo lido do RAW: " + nomeArquivo);
+            System.out.println("Arquivo lido do RAW: " + nomeArquivo);
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao ler arquivo do RAW: " + e.getMessage());
+            System.err.println("Erro ao ler arquivo do RAW: " + e.getMessage());
         }
 
         return linhas;
     }
 
-    // 🔹 Envia CSV tratado para o bucket TRUSTED
+    //Envia CSV tratado para o bucket TRUSTED
     public static void enviarCsvTrusted(String nomeArquivo, String conteudoCsv) {
         String bucketTrusted = pegarBucket("trusted");
 
@@ -64,11 +64,11 @@ public class ConexaoAws {
             System.out.println("✅ CSV tratado enviado para TRUSTED: " + nomeArquivo);
 
         } catch (Exception e) {
-            System.err.println("❌ Erro ao enviar CSV para TRUSTED: " + e.getMessage());
+            System.err.println("Erro ao enviar CSV para TRUSTED: " + e.getMessage());
         }
     }
 
-    // 🔹 Acha o bucket certo pelo nome (raw/trusted/client)
+    //Acha o bucket certo pelo nome (raw/trusted/client)
     private static String pegarBucket(String tipo) {
         ListBucketsResponse response = s3.listBuckets();
         for (Bucket b : response.buckets()) {
@@ -79,7 +79,7 @@ public class ConexaoAws {
         throw new RuntimeException("Bucket do tipo '" + tipo + "' não encontrado!");
     }
 
-    // 🔹 Lista todos os buckets da conta
+    //Lista todos os buckets da conta
     public static List<String> pegarBucketsS3() {
         List<String> buckets = new ArrayList<>();
         try {
@@ -93,7 +93,7 @@ public class ConexaoAws {
         return buckets;
     }
 
-    // 🔹 Testa conexão e categoriza buckets
+    //Testa conexão e categoriza buckets
     public static void main(String[] args) {
         try {
             System.out.println("Conectando à AWS S3...");
