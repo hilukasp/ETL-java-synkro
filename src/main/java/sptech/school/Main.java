@@ -35,10 +35,15 @@ public class Main {
         //Valida alertas no Synkro
         validarAlerta(listaLidoMainframe, listaLidoProcesso);
 
-        }else {
+        }else if(modoExecucao.equalsIgnoreCase("LOCAL")) {
             importarArquivoCSVMaquina("dados-mainframe", listaLidoMainframe);
             importarArquivoCSVProcesso("processos", listaLidoProcesso);
             gravarArquivoCSV(listaLidoMainframe, listaLidoProcesso, "trusted");
+
+            validarAlerta(listaLidoMainframe, listaLidoProcesso);
+
+        }else{
+
         }
     }
 
@@ -560,13 +565,13 @@ public class Main {
         try {
 
 
-            saida.append("macAdress;timestamp;identificao-mainframe;uso_cpu_total_%;uso_ram_total_%;swap_rate_mbs;tempo_cpu_ociosa;cpu_io_wait;uso_disco_total_%;disco_throughput_mbs;disco_iops_total;disco_read_count;disco_write_count;disco_latencia_msnome1;cpu_%1;mem_%1;nome2;cpu_%2;mem_%2;nome3;cpu_%3;mem_%3;nome4;cpu_%4;mem_%4;nome5;cpu_%5;mem_%5;nome6;cpu_%6;mem_%6;nome7;cpu_%7;mem_%7;nome8;cpu_%8;mem_%8;nome9;cpu_%9;mem_%9;nome10;cpu_%10;mem_%10\n");
+            saida.append("macAdress;timestamp;identificao-mainframe;uso_cpu_total_%;uso_ram_total_%;uso_disco_total_%;disco_throughput_mbs;disco_iops_total;disco_read_count;disco_write_count;disco_latencia_ms;nome1;cpu_%1;mem_%1;nome2;cpu_%2;mem_%2;nome3;cpu_%3;mem_%3;nome4;cpu_%4;mem_%4;nome5;cpu_%5;mem_%5;nome6;cpu_%6;mem_%6;nome7;cpu_%7;mem_%7;nome8;cpu_%8;mem_%8;nome9;cpu_%9;mem_%9;nome10;cpu_%10;mem_%10\n");
             for(Processo processo:listaprocesso){
                 for(Mainframe mainframe:listamainframe){
                     System.out.println(processo.getTimestamp());
                     if (mainframe.getTimestamp().equals(processo.getTimestamp())){
 
-                        saida.write(String.format("%s;%s;%s;%.2f;%.2f;%.2f;%.2f;%d;%d;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f\n", mainframe.getMacAdress(), mainframe.getTimestamp(), mainframe.getIdentificaoMainframe(), mainframe.getUsoCpuTotal(), mainframe.getUsoRamTotal(), mainframe.getUsoDiscoTotal(), mainframe.getDiscoThroughputMbs(), mainframe.getDiscoIopsTotal().intValue(), mainframe.getDiscoReadCount(), mainframe.getDiscoLatenciaMs(), processo.getNome1(), processo.getCpu1(), processo.getMem1(), processo.getNome2(), processo.getCpu2(), processo.getMem2(), processo.getNome3(), processo.getCpu3(), processo.getMem3(), processo.getNome4(), processo.getCpu4(), processo.getMem4(), processo.getNome5(), processo.getCpu5(), processo.getMem5(), processo.getNome6(), processo.getCpu6(), processo.getMem6(), processo.getNome7(), processo.getCpu7(), processo.getMem7(), processo.getNome8(), processo.getCpu8(), processo.getMem8(), processo.getNome9(), processo.getCpu9(), processo.getMem9()));
+                        saida.write(String.format("%s;%s;%s;%.2f;%.2f;%.2f;%.2f;%.2f;%d;%d;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f\n", mainframe.getMacAdress(), mainframe.getTimestamp(), mainframe.getIdentificaoMainframe(), mainframe.getUsoCpuTotal(), mainframe.getUsoRamTotal(), mainframe.getUsoDiscoTotal(), mainframe.getDiscoThroughputMbs(), mainframe.getDiscoIopsTotal(), mainframe.getDiscoReadCount(),mainframe.getDiscoWriteCount(), mainframe.getDiscoLatenciaMs(), processo.getNome1(), processo.getCpu1(), processo.getMem1(), processo.getNome2(), processo.getCpu2(), processo.getMem2(), processo.getNome3(), processo.getCpu3(), processo.getMem3(), processo.getNome4(), processo.getCpu4(), processo.getMem4(), processo.getNome5(), processo.getCpu5(), processo.getMem5(), processo.getNome6(), processo.getCpu6(), processo.getMem6(), processo.getNome7(), processo.getCpu7(), processo.getMem7(), processo.getNome8(), processo.getCpu8(), processo.getMem8(), processo.getNome9(), processo.getCpu9(), processo.getMem9()));
                     }
 
                 }
