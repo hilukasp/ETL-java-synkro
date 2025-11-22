@@ -21,29 +21,37 @@ public class Main {
         String modoExecucao = dotenv.get("MODO_EXECUCAO", "LOCAL");
 
         if (modoExecucao.equalsIgnoreCase("AWS")) {
-        //Baixa e trata os CSVs do bucket RAW direto da AWS
-        List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw("dados-mainframe.csv");
-        List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw("processos.csv");
+            //Baixa e trata os CSVs do bucket RAW direto da AWS
+            List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw("dados-mainframe.csv");
+            List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw("processos.csv");
 
-        importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe);
-        importarArquivoCSVProcessoMemoria(dadosProcesso, listaLidoProcesso);
+            importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe);
+            importarArquivoCSVProcessoMemoria(dadosProcesso, listaLidoProcesso);
 
-        //Gera CSV tratado e envia pro bucket TRUSTED
-        String csvTratado = gerarCsvTrusted(listaLidoMainframe, listaLidoProcesso);
-        ConexaoAws.enviarCsvTrusted("trusted.csv", csvTratado);
+            //Gera CSV tratado e envia pro bucket TRUSTED
+            String csvTratado = gerarCsvTrusted(listaLidoMainframe, listaLidoProcesso);
+            ConexaoAws.enviarCsvTrusted("trusted.csv", csvTratado);
 
-        //Valida alertas no Synkro
-        validarAlerta(listaLidoMainframe, listaLidoProcesso);
+            //Valida alertas no Synkro
+            validarAlerta(listaLidoMainframe, listaLidoProcesso);
 
-        }else if(modoExecucao.equalsIgnoreCase("LOCAL")) {
+        } else if (modoExecucao.equalsIgnoreCase("LOCAL")) {
             importarArquivoCSVMaquina("dados-mainframe", listaLidoMainframe);
             importarArquivoCSVProcesso("processos", listaLidoProcesso);
             gravarArquivoCSV(listaLidoMainframe, listaLidoProcesso, "trusted");
 
             validarAlerta(listaLidoMainframe, listaLidoProcesso);
 
-        }else{
+        } else {
+            importarArquivoCSVMaquina("dados-mainframe", listaLidoMainframe);
+            importarArquivoCSVProcesso("processos", listaLidoProcesso);
+            try {
+                gravarArquivoCSVSimulado(listaLidoMainframe, listaLidoProcesso, "trusted");
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
 
+            validarAlerta(listaLidoMainframe, listaLidoProcesso);
         }
     }
 
@@ -94,7 +102,7 @@ public class Main {
                                 if (countCpu >= qtdIncidencias) {
                                     gerarAlerta = true;
                                     countCpu = 0;
-                                     }
+                                }
                                 break;
                             }
                         case 2:
@@ -211,7 +219,7 @@ public class Main {
 
                     if (gerarAlerta) {
                         //System.out.println(" Alerta: Componente " + fkcomp + " fora dos limites");
- ConexaoBd.inserirAlerta(conn, data, fkcomp, valor, macAdress, nomecomponente,metrica);
+                        ConexaoBd.inserirAlerta(conn, data, fkcomp, valor, macAdress, nomecomponente, metrica);
                     }
                 }
             }
@@ -335,9 +343,9 @@ public class Main {
 
         sb.append("macAdress;timestamp;identificao-mainframe;uso_cpu_total_%;uso_ram_total_%;uso_disco_total_%;disco_throughput_mbs;disco_iops_total;disco_read_count;disco_write_count;disco_latencia_ms;nome1;cpu_%1;mem_%1;nome2;cpu_%2;mem_%2;nome3;cpu_%3;mem_%3;nome4;cpu_%4;mem_%4;nome5;cpu_%5;mem_%5;nome6;cpu_%6;mem_%6;nome7;cpu_%7;mem_%7;nome8;cpu_%8;mem_%8;nome9;cpu_%9;mem_%9;\n");
 
-        for(Processo processo:listaprocesso){
-            for(Mainframe mainframe:listamainframe){
-                if (mainframe.getTimestamp().equals(processo.getTimestamp())){
+        for (Processo processo : listaprocesso) {
+            for (Mainframe mainframe : listamainframe) {
+                if (mainframe.getTimestamp().equals(processo.getTimestamp())) {
 
                     sb.append(String.format(
                             "%s;%s;%s;%.2f;%.2f;%.2f;%.2f;%d;%d;%d;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f\n",
@@ -391,7 +399,6 @@ public class Main {
             String[] registro; //registro é um vetor que armazenará toda as linhas do arquivo
             String linha = entrada.readLine(); //le somenta uma linha inteira
             registro = linha.split(";");
-            System.out.printf("%1s %20s %40s %19s %20s %14s %20s %20s %20s %20s %20s %20s %20s %20s\n", registro[0], registro[1], registro[2], registro[3], registro[4], registro[5], registro[6], registro[7], registro[8], registro[9], registro[10], registro[11], registro[12], registro[13]);
 
             //ler a segunda linha do arquivo
             linha = entrada.readLine();
@@ -417,7 +424,6 @@ public class Main {
                     mainframe.setDiscoReadCount(Integer.valueOf(registro[11]));
                     mainframe.setDiscoWriteCount(Integer.valueOf(registro[12]));
                     mainframe.setDiscoLatenciaMs(Double.valueOf(registro[13].replace(",", ".")));
-                    System.out.printf("%1s %24s %20s %20s %21s %20s %20s %20s %20s %20s %20s %20s %20s %20s\n", registro[0], registro[1], registro[2], registro[3], registro[4], registro[5], registro[6], registro[7], registro[8], registro[9], registro[10], registro[11], registro[12], registro[13]);
                     listaLido.add(mainframe);
 
                 } catch (NumberFormatException erro) {
@@ -481,48 +487,55 @@ public class Main {
                         linha = entrada.readLine();
                         continue;
                     }
+                    //se a cpu for maior que 100%
+                    if (Double.parseDouble(registro[3]) > 100.0) {
+                        linha = entrada.readLine();
+                        continue;
+                    }
                     ultimoTimestamp = timestampAtual;
 
                     processo.setTimestamp(timestampAtual);
                     processo.setMacAdress(registro[1]);
                     processo.setIdentificacaoMainframe(registro[2]);
+                    processo.setCpu_total(Double.parseDouble(registro[3].replace(",", ".")));
+                    processo.setRam_total(Double.parseDouble(registro[4].replace(",", ".")));
 
                     //processos
-                    processo.setNome1(registro[6]);
-                    processo.setCpu1(Double.parseDouble(registro[7].replace(",", ".")));
-                    processo.setMem1(Double.parseDouble(registro[8].replace(",", ".")));
+                    processo.setNome1(registro[5]);
+                    processo.setCpu1(Double.parseDouble(registro[6].replace(",", ".")));
+                    processo.setMem1(Double.parseDouble(registro[7].replace(",", ".")));
 
-                    processo.setNome2(registro[9]);
-                    processo.setCpu2(Double.parseDouble(registro[10].replace(",", ".")));
-                    processo.setMem2(Double.parseDouble(registro[11].replace(",", ".")));
+                    processo.setNome2(registro[8]);
+                    processo.setCpu2(Double.parseDouble(registro[9].replace(",", ".")));
+                    processo.setMem2(Double.parseDouble(registro[10].replace(",", ".")));
 
-                    processo.setNome3(registro[12]);
-                    processo.setCpu3(Double.parseDouble(registro[13].replace(",", ".")));
-                    processo.setMem3(Double.parseDouble(registro[14].replace(",", ".")));
+                    processo.setNome3(registro[11]);
+                    processo.setCpu3(Double.parseDouble(registro[12].replace(",", ".")));
+                    processo.setMem3(Double.parseDouble(registro[13].replace(",", ".")));
 
-                    processo.setNome4(registro[15]);
-                    processo.setCpu4(Double.parseDouble(registro[16].replace(",", ".")));
-                    processo.setMem4(Double.parseDouble(registro[17].replace(",", ".")));
+                    processo.setNome4(registro[14]);
+                    processo.setCpu4(Double.parseDouble(registro[15].replace(",", ".")));
+                    processo.setMem4(Double.parseDouble(registro[16].replace(",", ".")));
 
-                    processo.setNome5(registro[18]);
-                    processo.setCpu5(Double.parseDouble(registro[19].replace(",", ".")));
-                    processo.setMem5(Double.parseDouble(registro[20].replace(",", ".")));
+                    processo.setNome5(registro[17]);
+                    processo.setCpu5(Double.parseDouble(registro[18].replace(",", ".")));
+                    processo.setMem5(Double.parseDouble(registro[19].replace(",", ".")));
 
-                    processo.setNome6(registro[21]);
-                    processo.setCpu6(Double.parseDouble(registro[22].replace(",", ".")));
-                    processo.setMem6(Double.parseDouble(registro[23].replace(",", ".")));
+                    processo.setNome6(registro[20]);
+                    processo.setCpu6(Double.parseDouble(registro[21].replace(",", ".")));
+                    processo.setMem6(Double.parseDouble(registro[22].replace(",", ".")));
 
-                    processo.setNome7(registro[24]);
-                    processo.setCpu7(Double.parseDouble(registro[25].replace(",", ".")));
-                    processo.setMem7(Double.parseDouble(registro[26].replace(",", ".")));
+                    processo.setNome7(registro[23]);
+                    processo.setCpu7(Double.parseDouble(registro[24].replace(",", ".")));
+                    processo.setMem7(Double.parseDouble(registro[25].replace(",", ".")));
 
-                    processo.setNome8(registro[27]);
-                    processo.setCpu8(Double.parseDouble(registro[28].replace(",", ".")));
-                    processo.setMem8(Double.parseDouble(registro[29].replace(",", ".")));
+                    processo.setNome8(registro[26]);
+                    processo.setCpu8(Double.parseDouble(registro[27].replace(",", ".")));
+                    processo.setMem8(Double.parseDouble(registro[28].replace(",", ".")));
 
-                    processo.setNome9(registro[30]);
-                    processo.setCpu9(Double.parseDouble(registro[31].replace(",", ".")));
-                    processo.setMem9(Double.parseDouble(registro[32].replace(",", ".")));
+                    processo.setNome9(registro[29]);
+                    processo.setCpu9(Double.parseDouble(registro[30].replace(",", ".")));
+                    processo.setMem9(Double.parseDouble(registro[31].replace(",", ".")));
 
 
                     //System.out.printf("%1s %16s %20s %20s %20s %20s %20s %20s %20s %20s %20s %20s %20s\n",registro[0],registro[1],registro[2],registro[3],registro[4],registro[5],registro[6],registro[7],registro[8],registro[9],registro[10],registro[11],registro[12]);
@@ -548,6 +561,7 @@ public class Main {
             }
         }
     }
+
     public static void gravarArquivoCSV(List<Mainframe> listamainframe, List<Processo> listaprocesso, String nomeArq) {
         //biblioteca
         OutputStreamWriter saida = null;
@@ -565,13 +579,11 @@ public class Main {
         try {
 
 
-            saida.append("macAdress;timestamp;identificao-mainframe;uso_cpu_total_%;uso_ram_total_%;uso_disco_total_%;disco_throughput_mbs;disco_iops_total;disco_read_count;disco_write_count;disco_latencia_ms;nome1;cpu_%1;mem_%1;nome2;cpu_%2;mem_%2;nome3;cpu_%3;mem_%3;nome4;cpu_%4;mem_%4;nome5;cpu_%5;mem_%5;nome6;cpu_%6;mem_%6;nome7;cpu_%7;mem_%7;nome8;cpu_%8;mem_%8;nome9;cpu_%9;mem_%9;nome10;cpu_%10;mem_%10\n");
-            for(Processo processo:listaprocesso){
-                for(Mainframe mainframe:listamainframe){
-                    System.out.println(processo.getTimestamp());
-                    if (mainframe.getTimestamp().equals(processo.getTimestamp())){
-
-                        saida.write(String.format("%s;%s;%s;%.2f;%.2f;%.2f;%.2f;%.2f;%d;%d;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f\n", mainframe.getMacAdress(), mainframe.getTimestamp(), mainframe.getIdentificaoMainframe(), mainframe.getUsoCpuTotal(), mainframe.getUsoRamTotal(), mainframe.getUsoDiscoTotal(), mainframe.getDiscoThroughputMbs(), mainframe.getDiscoIopsTotal(), mainframe.getDiscoReadCount(),mainframe.getDiscoWriteCount(), mainframe.getDiscoLatenciaMs(), processo.getNome1(), processo.getCpu1(), processo.getMem1(), processo.getNome2(), processo.getCpu2(), processo.getMem2(), processo.getNome3(), processo.getCpu3(), processo.getMem3(), processo.getNome4(), processo.getCpu4(), processo.getMem4(), processo.getNome5(), processo.getCpu5(), processo.getMem5(), processo.getNome6(), processo.getCpu6(), processo.getMem6(), processo.getNome7(), processo.getCpu7(), processo.getMem7(), processo.getNome8(), processo.getCpu8(), processo.getMem8(), processo.getNome9(), processo.getCpu9(), processo.getMem9()));
+            saida.append("macAdress;timestamp;identificao-mainframe;uso_cpu_total_perc;uso_ram_total_perc;uso_disco_total_perc;disco_throughput_mbs;disco_iops_total;disco_read_count;disco_write_count;disco_latencia_ms;nome1;cpu_perc1;mem_perc1;nome2;cpu_perc2;mem_perc2;nome3;cpu_perc3;mem_perc3;nome4;cpu_perc4;mem_perc4;nome5;cpu_perc5;mem_perc5;nome6;cpu_perc6;mem_perc6;nome7;cpu_perc7;mem_perc7;nome8;cpu_perc8;mem_perc8;nome9;cpu_perc9;mem_perc9;nome10;cpu_perc10;mem_perc10\n");
+            for (Processo processo : listaprocesso) {
+                for (Mainframe mainframe : listamainframe) {
+                    if (mainframe.getTimestamp().equals(processo.getTimestamp())) {
+                        saida.write(String.format("%s;%s;%s;%.2f;%.2f;%.2f;%.2f;%.2f;%d;%d;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f\n", mainframe.getMacAdress(), mainframe.getTimestamp(), mainframe.getIdentificaoMainframe(), processo.getCpu_total(), processo.getRam_total(), mainframe.getUsoDiscoTotal(), mainframe.getDiscoThroughputMbs(), mainframe.getDiscoIopsTotal(), mainframe.getDiscoReadCount(), mainframe.getDiscoWriteCount(), mainframe.getDiscoLatenciaMs(), processo.getNome1(), processo.getCpu1(), processo.getMem1(), processo.getNome2(), processo.getCpu2(), processo.getMem2(), processo.getNome3(), processo.getCpu3(), processo.getMem3(), processo.getNome4(), processo.getCpu4(), processo.getMem4(), processo.getNome5(), processo.getCpu5(), processo.getMem5(), processo.getNome6(), processo.getCpu6(), processo.getMem6(), processo.getNome7(), processo.getCpu7(), processo.getMem7(), processo.getNome8(), processo.getCpu8(), processo.getMem8(), processo.getNome9(), processo.getCpu9(), processo.getMem9()));
                     }
 
                 }
@@ -597,5 +609,60 @@ public class Main {
         System.out.println("lendo o arquivo");
 
     }
-}
 
+    public static void gravarArquivoCSVSimulado(List<Mainframe> listamainframe, List<Processo> listaprocesso, String nomeArq) throws ParseException {
+        //biblioteca
+        OutputStreamWriter saida = null;
+        Boolean falha = false;
+        nomeArq += ".csv";
+        long cincoMinutos = 5 * 60 * 1000;
+        SimpleDateFormat dtEntrada = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        SimpleDateFormat dtSaida = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = dtSaida.parse("2025-11-21 12:00:00");
+
+        try {
+            saida = new OutputStreamWriter(new FileOutputStream(nomeArq), StandardCharsets.UTF_8);
+        } catch (IOException erro) {
+            System.out.println("Erro ao abrir o arquivo");
+            System.exit(1);
+        }
+
+        try {
+
+
+            saida.append("macAdress;timestamp;identificao-mainframe;uso_cpu_total_perc;uso_ram_total_perc;uso_disco_total_perc;disco_throughput_mbs;disco_iops_total;disco_read_count;disco_write_count;disco_latencia_ms;nome1;cpu_perc1;mem_perc1;nome2;cpu_perc2;mem_perc2;nome3;cpu_perc3;mem_perc3;nome4;cpu_perc4;mem_perc4;nome5;cpu_perc5;mem_perc5;nome6;cpu_perc6;mem_perc6;nome7;cpu_perc7;mem_perc7;nome8;cpu_perc8;mem_perc8;nome9;cpu_perc9;mem_perc9;nome10;cpu_perc10;mem_perc10\n");
+            for (Processo processo : listaprocesso) {
+                for (Mainframe mainframe : listamainframe) {
+
+                    if (mainframe.getTimestamp().equals(processo.getTimestamp())) {
+
+                        date = new Date(date.getTime() + cincoMinutos);
+                        String timestampGerado = dtSaida.format(date);
+                        saida.write(String.format("%s;%s;%s;%.2f;%.2f;%.2f;%.2f;%.2f;%d;%d;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f\n", mainframe.getMacAdress(), timestampGerado, mainframe.getIdentificaoMainframe(), processo.getCpu_total(), processo.getRam_total(), mainframe.getUsoDiscoTotal(), mainframe.getDiscoThroughputMbs(), mainframe.getDiscoIopsTotal(), mainframe.getDiscoReadCount(), mainframe.getDiscoWriteCount(), mainframe.getDiscoLatenciaMs(), processo.getNome1(), processo.getCpu1(), processo.getMem1(), processo.getNome2(), processo.getCpu2(), processo.getMem2(), processo.getNome3(), processo.getCpu3(), processo.getMem3(), processo.getNome4(), processo.getCpu4(), processo.getMem4(), processo.getNome5(), processo.getCpu5(), processo.getMem5(), processo.getNome6(), processo.getCpu6(), processo.getMem6(), processo.getNome7(), processo.getCpu7(), processo.getMem7(), processo.getNome8(), processo.getCpu8(), processo.getMem8(), processo.getNome9(), processo.getCpu9(), processo.getMem9()));
+                    }
+
+                }
+            }
+
+        } catch (IOException erro) {
+            System.out.println("Erro ao gravar no arquivo");
+            erro.printStackTrace();
+            falha = true;
+        } finally {
+            try {
+                saida.close();
+            } catch (IOException erro) {
+                System.out.println("erro ao feixar o arquivo");
+                falha = true;
+            }
+            if (falha) {
+                System.exit(1);
+            }
+        }
+
+
+        System.out.println("lendo o arquivo");
+
+    }
+
+}

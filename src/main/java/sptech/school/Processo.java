@@ -4,6 +4,8 @@ public class Processo {
     private String timestamp;
     private String macAdress;
     private String identificacaoMainframe;
+    private Double cpu_total;
+    private Double ram_total;
     private String nome1; private Double cpu1; private Double mem1;
     private String nome2; private Double cpu2; private Double mem2;
     private String nome3; private Double cpu3; private Double mem3;
@@ -14,14 +16,14 @@ public class Processo {
     private String nome8; private Double cpu8; private Double mem8;
     private String nome9; private Double cpu9; private Double mem9;
 
-
-
     @Override
     public String toString() {
         return "Processo{" +
                 "timestamp='" + timestamp + '\'' +
                 ", macAdress='" + macAdress + '\'' +
                 ", identificacaoMainframe='" + identificacaoMainframe + '\'' +
+                ", cpu_total=" + cpu_total +
+                ", ram_total=" + ram_total +
                 ", nome1='" + nome1 + '\'' +
                 ", cpu1=" + cpu1 +
                 ", mem1=" + mem1 +
@@ -51,6 +53,23 @@ public class Processo {
                 ", mem9=" + mem9 +
                 '}';
     }
+
+    public Double getCpu_total() {
+        return cpu_total;
+    }
+
+    public void setCpu_total(Double cpu_total) {
+        this.cpu_total = cpu_total;
+    }
+
+    public Double getRam_total() {
+        return ram_total;
+    }
+
+    public void setRam_total(Double ram_total) {
+        this.ram_total = ram_total;
+    }
+
 
 
     public String getTimestamp() {
