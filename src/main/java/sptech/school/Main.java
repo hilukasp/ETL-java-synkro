@@ -1,6 +1,7 @@
 package sptech.school;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -16,24 +17,48 @@ public class Main {
     public static void main(String[] args) {
         List<Mainframe> listaLidoMainframe = new ArrayList<>();
         List<Processo> listaLidoProcesso = new ArrayList<>();
+        List<String> idEmpresas = new ArrayList<>();
 
         Dotenv dotenv = Dotenv.load();
         String modoExecucao = dotenv.get("MODO_EXECUCAO", "LOCAL");
 
         if (modoExecucao.equalsIgnoreCase("AWS")) {
-            //Baixa e trata os CSVs do bucket RAW direto da AWS
-            List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw("dados-mainframe.csv");
-            List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw("processos.csv");
+            //lista todas as empresas existentes pelo id e adiciona em uma lista
+            try (Connection conn = DriverManager.getConnection(
+                    dotenv.get("DB_URL"),
+                    dotenv.get("DB_USER"),
+                    dotenv.get("DB_PASSWORD")
+            )) {
+                idEmpresas = ConexaoBd.listaEmpresas(conn);
 
-            importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe);
-            importarArquivoCSVProcessoMemoria(dadosProcesso, listaLidoProcesso);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-            //Gera CSV tratado e envia pro bucket TRUSTED
-            String csvTratado = gerarCsvTrusted(listaLidoMainframe, listaLidoProcesso);
-            ConexaoAws.enviarCsvTrusted("trusted.csv", csvTratado);
 
-            //Valida alertas no Synkro
-            validarAlerta(listaLidoMainframe, listaLidoProcesso);
+            for (String idempresa:idEmpresas){
+                //Baixa e trata os CSVs do bucket RAW direto da AWS
+                List<String> diretorios=ConexaoAws.listarDiretorios(idempresa);
+                System.out.println(diretorios);
+
+                //para cada diretório, faça
+                for (String diretorio : diretorios) {
+                    System.out.println(diretorio+"dados-mainframe.csv");
+                    List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"dados-mainframe.csv");
+                    List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"processos.csv");
+
+                    importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe);
+                    importarArquivoCSVProcessoMemoria(dadosProcesso, listaLidoProcesso);
+
+                    //Gera CSV tratado e envia pro bucket TRUSTED
+                    String csvTratado = gerarCsvTrusted(listaLidoMainframe, listaLidoProcesso);
+                    ConexaoAws.enviarCsvTrusted(diretorio+"trusted.csv", csvTratado);
+
+                    //Valida alertas no Synkro
+                    validarAlerta(listaLidoMainframe, listaLidoProcesso);
+
+                }
+            }
 
         } else if (modoExecucao.equalsIgnoreCase("LOCAL")) {
             importarArquivoCSVMaquina("dados-mainframe", listaLidoMainframe);
@@ -289,41 +314,41 @@ public class Main {
                     processo.setIdentificacaoMainframe(registro[2]);
 
                     //processos
-                    processo.setNome1(registro[6]);
-                    processo.setCpu1(Double.parseDouble(registro[7].replace(",", ".")));
-                    processo.setMem1(Double.parseDouble(registro[8].replace(",", ".")));
+                    processo.setNome1(registro[5]);
+                    processo.setCpu1(Double.parseDouble(registro[6].replace(",", ".")));
+                    processo.setMem1(Double.parseDouble(registro[7].replace(",", ".")));
 
-                    processo.setNome2(registro[9]);
-                    processo.setCpu2(Double.parseDouble(registro[10].replace(",", ".")));
-                    processo.setMem2(Double.parseDouble(registro[11].replace(",", ".")));
+                    processo.setNome2(registro[8]);
+                    processo.setCpu2(Double.parseDouble(registro[9].replace(",", ".")));
+                    processo.setMem2(Double.parseDouble(registro[10].replace(",", ".")));
 
-                    processo.setNome3(registro[12]);
-                    processo.setCpu3(Double.parseDouble(registro[13].replace(",", ".")));
-                    processo.setMem3(Double.parseDouble(registro[14].replace(",", ".")));
+                    processo.setNome3(registro[11]);
+                    processo.setCpu3(Double.parseDouble(registro[12].replace(",", ".")));
+                    processo.setMem3(Double.parseDouble(registro[13].replace(",", ".")));
 
-                    processo.setNome4(registro[15]);
-                    processo.setCpu4(Double.parseDouble(registro[16].replace(",", ".")));
-                    processo.setMem4(Double.parseDouble(registro[17].replace(",", ".")));
+                    processo.setNome4(registro[14]);
+                    processo.setCpu4(Double.parseDouble(registro[15].replace(",", ".")));
+                    processo.setMem4(Double.parseDouble(registro[16].replace(",", ".")));
 
-                    processo.setNome5(registro[18]);
-                    processo.setCpu5(Double.parseDouble(registro[19].replace(",", ".")));
-                    processo.setMem5(Double.parseDouble(registro[20].replace(",", ".")));
+                    processo.setNome5(registro[17]);
+                    processo.setCpu5(Double.parseDouble(registro[18].replace(",", ".")));
+                    processo.setMem5(Double.parseDouble(registro[19].replace(",", ".")));
 
-                    processo.setNome6(registro[21]);
-                    processo.setCpu6(Double.parseDouble(registro[22].replace(",", ".")));
-                    processo.setMem6(Double.parseDouble(registro[23].replace(",", ".")));
+                    processo.setNome6(registro[20]);
+                    processo.setCpu6(Double.parseDouble(registro[21].replace(",", ".")));
+                    processo.setMem6(Double.parseDouble(registro[22].replace(",", ".")));
 
-                    processo.setNome7(registro[24]);
-                    processo.setCpu7(Double.parseDouble(registro[25].replace(",", ".")));
-                    processo.setMem7(Double.parseDouble(registro[26].replace(",", ".")));
+                    processo.setNome7(registro[23]);
+                    processo.setCpu7(Double.parseDouble(registro[24].replace(",", ".")));
+                    processo.setMem7(Double.parseDouble(registro[25].replace(",", ".")));
 
-                    processo.setNome8(registro[27]);
-                    processo.setCpu8(Double.parseDouble(registro[28].replace(",", ".")));
-                    processo.setMem8(Double.parseDouble(registro[29].replace(",", ".")));
+                    processo.setNome8(registro[26]);
+                    processo.setCpu8(Double.parseDouble(registro[27].replace(",", ".")));
+                    processo.setMem8(Double.parseDouble(registro[28].replace(",", ".")));
 
-                    processo.setNome9(registro[30]);
-                    processo.setCpu9(Double.parseDouble(registro[31].replace(",", ".")));
-                    processo.setMem9(Double.parseDouble(registro[32].replace(",", ".")));
+                    processo.setNome9(registro[29]);
+                    processo.setCpu9(Double.parseDouble(registro[30].replace(",", ".")));
+                    processo.setMem9(Double.parseDouble(registro[31].replace(",", ".")));
 
 
                     //System.out.printf("%1s %16s %20s %20s %20s %20s %20s %20s %20s %20s %20s %20s %20s\n",registro[0],registro[1],registro[2],registro[3],registro[4],registro[5],registro[6],registro[7],registro[8],registro[9],registro[10],registro[11],registro[12]);
@@ -331,6 +356,7 @@ public class Main {
                     listaLidoProcesso.add(processo);
                 } catch (NumberFormatException erro) {
                     System.out.println("Erro import");
+                    System.out.println(erro.getMessage());
                 }
             }
         } catch (Exception e) {

@@ -86,4 +86,23 @@ public class ConexaoBd {
         }
         return lista;
     }
+
+    //lista empresa
+    public static List<String> listaEmpresas(Connection conn) throws SQLException {
+        String sql = "SELECT id FROM empresa;";
+
+        List<String> lista = new ArrayList<>();
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                lista.add(rs.getString("id"));
+            }
+        }catch (SQLException e) {
+            System.err.println("erro em listar empresa: " + e.getMessage());
+        }
+
+        return lista;
+    }
 }
