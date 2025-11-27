@@ -14,7 +14,7 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         List<Mainframe> listaLidoMainframe = new ArrayList<>();
         List<Processo> listaLidoProcesso = new ArrayList<>();
         List<String> idEmpresas = new ArrayList<>();
@@ -43,11 +43,19 @@ public class Main {
 
                 //para cada diretório, faça
                 for (String diretorio : diretorios) {
-                    System.out.println(diretorio+"dados-mainframe.csv");
-                    List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"dados-mainframe.csv");
-                    List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"processos.csv");
 
-                    importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe);
+                    List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"dados-mainframe.csv");
+                    String ultimoTimestampMainframe = dadosMainframe.get(dadosMainframe.size() - 1)[0];
+                    SimpleDateFormat dtEntrada = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                    SimpleDateFormat dtSaida = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date dataConvertida = dtEntrada.parse(ultimoTimestampMainframe);
+                    ultimoTimestampMainframe = dtSaida.format(dataConvertida);
+                    importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe, ultimoTimestampMainframe);
+
+                    List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"processos.csv");
+                    String ultimoTimestampProcesso = dadosMainframe.get(dadosMainframe.size() - 1)[0];
+                    dataConvertida = dtEntrada.parse(ultimoTimestampProcesso);
+                    ultimoTimestampProcesso = dtSaida.format(dataConvertida);
                     importarArquivoCSVProcessoMemoria(dadosProcesso, listaLidoProcesso);
 
                     //Gera CSV tratado e envia pro bucket TRUSTED
@@ -254,7 +262,7 @@ public class Main {
         }
     }
 
-    public static void importarArquivoCSVMaquinaMemoria(List<String[]> dados, List<Mainframe> listaLido) {
+    public static void importarArquivoCSVMaquinaMemoria(List<String[]> dados, List<Mainframe> listaLido,Date ultimotimestamp) {
         try {
             SimpleDateFormat dtEntrada = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             SimpleDateFormat dtSaida = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -263,9 +271,14 @@ public class Main {
                 String[] registro = dados.get(i);
                 Mainframe mainframe = new Mainframe();
 
+                Date date = dtEntrada.parse(registro[1]);
+                mainframe.setTimestamp(dtSaida.format(date));
+                if (date.compareTo(ultimotimestamp)<=0) {
+                    continue;
+                }
                 try {
                     mainframe.setMacAdress(registro[0]);
-                    Date date = dtEntrada.parse(registro[1]);
+                    date = dtEntrada.parse(registro[1]);
                     mainframe.setTimestamp(dtSaida.format(date));
 
                     mainframe.setIdentificaoMainframe(registro[2]);
