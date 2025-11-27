@@ -31,22 +31,30 @@ public class ConexaoBd {
                                      String dtHora, Integer fkComponente, Object valorColetado,
                                      String macAdress, String nomeComponente,String metrica) {
         String sql = """
-            INSERT INTO alerta (dt_hora, fkComponente, valor_coletado, fkMainframe, fkGravidade, fkStatus, fkMetrica)
-            VALUES (?, ?, ?, 
-                    (SELECT id FROM mainframe WHERE macAdress = ?),
-                    1, 1, ?)
-            """;
+        INSERT INTO alerta (dt_hora, valor_coletado, fkMetrica, fkStatus)
+        VALUES (
+            ?, ?, 
+            (SELECT m.id
+             FROM metrica m
+             JOIN mainframe mf ON m.fkMainframe = mf.id
+             WHERE m.fkComponente = ? AND mf.macAdress = ?
+             LIMIT 1),
+            1
+        )
+        """;
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, dtHora);
-            stmt.setInt(2, fkComponente);
-            stmt.setObject(3, valorColetado);
+            stmt.setObject(2, valorColetado);
+            stmt.setInt(3, fkComponente);
             stmt.setString(4, macAdress);
-            stmt.setInt(5, fkComponente);
 
             stmt.executeUpdate();
 
-            String descricao = "Valor "+ metrica +" fora do limite: " + valorColetado+" || macAdress: "+macAdress+" || hora: "+dtHora;
+            String descricao = "Valor " + metrica + " fora do limite: " + valorColetado +
+                    " || componente: " + nomeComponente +
+                    " || macAdress: " + macAdress +
+                    " || hora: " + dtHora;
 
             System.out.println("Alerta inserido para " + nomeComponente);
             abrirChamado("Alerta no " + nomeComponente, descricao);
@@ -61,11 +69,10 @@ public class ConexaoBd {
     // Busca métricas configuradas para um mainframe
     public static List<List<Object>> buscarMetricas(Connection conn, String macAdress) throws SQLException {
         String sql = """
-        SELECT cm.fkComponente, m.min, m.max, c.nome
-        FROM componente_mainframe cm
-        JOIN metrica m ON m.id = cm.fkMetrica AND m.fkComponente = cm.fkComponente
-        JOIN componente c ON c.id = cm.fkComponente
-        JOIN mainframe mf ON mf.id = cm.fkMainframe
+        SELECT fkComponente, min, max, c.nome
+        FROM metrica m
+        JOIN componente c ON m.fkComponente = c.id
+        JOIN mainframe mf ON m.fkMainframe = mf.id
         WHERE mf.macAdress = ?
         """;
 
