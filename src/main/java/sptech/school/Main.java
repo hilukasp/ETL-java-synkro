@@ -91,13 +91,14 @@ public class Main {
 
 
             Mainframe mainframe = listamainframe.get(listamainframe.size() - 1);
+            Processo processo = listaprocesso.get(listaprocesso.size() - 1);
 
             String data = mainframe.getTimestamp();
             String macAdress = mainframe.getMacAdress();
 
             double usoDisco = mainframe.getUsoDiscoTotal();
-            double usoRam = mainframe.getUsoRamTotal();
-            double usoCpu = mainframe.getUsoCpuTotal();
+            double usoRam = processo.getRam_total();
+            double usoCpu = processo.getCpu_total();
             double cpuOciosa = mainframe.getTempoCpuOciosa();
             double cpuIoWait = mainframe.getCpuIoWait();
             double swapRate = mainframe.getSwapRateMbs();
