@@ -43,19 +43,11 @@ public class Main {
 
                 //para cada diretório, faça
                 for (String diretorio : diretorios) {
-
+                    System.out.println(diretorio+"dados-mainframe.csv");
                     List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"dados-mainframe.csv");
-                    String ultimoTimestampMainframe = dadosMainframe.get(dadosMainframe.size() - 1)[0];
-                    SimpleDateFormat dtEntrada = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-                    SimpleDateFormat dtSaida = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    Date dataConvertida = dtEntrada.parse(ultimoTimestampMainframe);
-                    ultimoTimestampMainframe = dtSaida.format(dataConvertida);
-                    importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe, ultimoTimestampMainframe);
-
                     List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"processos.csv");
-                    String ultimoTimestampProcesso = dadosMainframe.get(dadosMainframe.size() - 1)[0];
-                    dataConvertida = dtEntrada.parse(ultimoTimestampProcesso);
-                    ultimoTimestampProcesso = dtSaida.format(dataConvertida);
+
+                    importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe);
                     importarArquivoCSVProcessoMemoria(dadosProcesso, listaLidoProcesso);
 
                     //Gera CSV tratado e envia pro bucket TRUSTED
@@ -97,7 +89,162 @@ public class Main {
             int countOc = 0, countWait = 0, countThru = 0, countIops = 0;
             int countRead = 0, countWrite = 0, countLat = 0;
 
-            for (Mainframe mainframe : listamainframe) {
+
+            Mainframe mainframe = listamainframe.get(listamainframe.size() - 1);
+
+            String data = mainframe.getTimestamp();
+            String macAdress = mainframe.getMacAdress();
+
+            double usoDisco = mainframe.getUsoDiscoTotal();
+            double usoRam = mainframe.getUsoRamTotal();
+            double usoCpu = mainframe.getUsoCpuTotal();
+            double cpuOciosa = mainframe.getTempoCpuOciosa();
+            double cpuIoWait = mainframe.getCpuIoWait();
+            double swapRate = mainframe.getSwapRateMbs();
+            double throughput = mainframe.getDiscoThroughputMbs();
+            double discIops = mainframe.getDiscoIopsTotal();
+            double read = mainframe.getDiscoReadCount().doubleValue();
+            double write = mainframe.getDiscoWriteCount().doubleValue();
+            double latenciaDisc = mainframe.getDiscoLatenciaMs();
+
+
+            List<List<Object>> componentes = ConexaoBd.buscarMetricas(conn, macAdress);
+
+            for (List<Object> c : componentes) {
+                int fkcomp = (Integer) c.get(0);
+                Double min = (Double) c.get(1);
+                Double max = (Double) c.get(2);
+                String nomecomponente = (String) c.get(3);
+                Integer qtdIncidencias = 1;
+                Double valor = 0.0;
+                String metrica = "";
+                boolean gerarAlerta = false;
+
+                switch (fkcomp) {
+                    case 1:
+                        valor = usoCpu;
+                        metrica = "Uso CPU";
+                        if (valor < min || valor > max) {
+                            countCpu++;
+                            if (countCpu >= qtdIncidencias) {
+                                gerarAlerta = true;
+                                countCpu = 0;
+                            }
+                            break;
+                        }
+                    case 2:
+                        valor = usoRam;
+                        metrica = "Uso RAM";
+                        if (valor < min || valor > max) countRam++;
+                    {
+                        if (countRam >= qtdIncidencias) {
+                            gerarAlerta = true;
+                            countRam = 0;
+                        }
+                        break;
+                    }
+                    case 3:
+                        valor = usoDisco;
+                        metrica = "Uso Disco";
+                        if (valor < min || valor > max) {
+                            countDisco++;
+                            if (countDisco >= qtdIncidencias) {
+                                gerarAlerta = true;
+                                countDisco = 0;
+                            }
+                            break;
+                        }
+                    case 4:
+                        valor = swapRate;
+                        metrica = "Swap Rate";
+                        if (valor < min || valor > max) {
+                            countSwap++;
+                            if (countSwap >= qtdIncidencias) {
+                                gerarAlerta = true;
+                                countSwap = 0;
+                            }
+                            break;
+                        }
+                    case 5:
+                        valor = cpuOciosa;
+                        metrica = "CPU Ociosa";
+                        if (valor < min || valor > max) {
+                            countOc++;
+                            if (countOc >= qtdIncidencias) {
+                                gerarAlerta = true;
+                                countOc = 0;
+                            }
+                            break;
+                        }
+                    case 6:
+                        valor = cpuIoWait;
+                        metrica = "CPU IO Wait";
+                        if (valor < min || valor > max) {
+                            countWait++;
+                            if (countWait >= qtdIncidencias) {
+                                gerarAlerta = true;
+                                countWait = 0;
+                            }
+                            break;
+                        }
+                    case 7:
+                        valor = throughput;
+                        metrica = "Throughput";
+                        if (valor < min || valor > max) {
+                            countThru++;
+                            if (countThru >= qtdIncidencias) {
+                                gerarAlerta = true;
+                                countThru = 0;
+                            }
+                            break;
+                        }
+                    case 8:
+                        valor = discIops;
+                        metrica = "Disco IOps";
+                        if (valor < min || valor > max) {
+                            countIops++;
+                            if (countIops >= qtdIncidencias) {
+                                gerarAlerta = true;
+                                countIops = 0;
+                            }
+                            break;
+                        }
+                    case 9:
+                        valor = read;
+                        metrica = "Leitura do Disco";
+                        if (valor < min || valor > max) {
+                            countRead++;
+                            if (countRead >= qtdIncidencias) {
+                                gerarAlerta = true;
+                                countRead = 0;
+                            }
+                            break;
+                        }
+                    case 10:
+                        valor = write;
+                        metrica = "Escrita do Disco";
+                        if (valor < min || valor > max) {
+                            countWrite++;
+                            if (countWrite >= qtdIncidencias) {
+                                gerarAlerta = true;
+                                countWrite = 0;
+                            }
+                            break;
+                        }
+                    case 11:
+                        valor = latenciaDisc;
+                        metrica = "Latência do Disco";
+                        if (valor < min || valor > max) {
+                            countLat++;
+                            if (countLat >= qtdIncidencias) {
+                                gerarAlerta = true;
+                                countLat = 0;
+                            }
+                            break;
+                        }
+
+            //valida alerta com base em lista, como vamos pegar só o ultimo registro, isso não tem necessidade
+            /*for (Mainframe mainframe : listamainframe) {
                 String data = mainframe.getTimestamp();
                 String macAdress = mainframe.getMacAdress();
 
@@ -121,7 +268,7 @@ public class Main {
                     Double min = (Double) c.get(1);
                     Double max = (Double) c.get(2);
                     String nomecomponente = (String) c.get(3);
-                    Integer qtdIncidencias = 5;
+                    Integer qtdIncidencias = 1;
                     Double valor = 0.0;
                     String metrica = "";
                     boolean gerarAlerta = false;
@@ -248,7 +395,7 @@ public class Main {
                                 }
                                 break;
                             }
-                    }
+                    }*/
 
                     if (gerarAlerta) {
                         //System.out.println(" Alerta: Componente " + fkcomp + " fora dos limites");
@@ -261,8 +408,7 @@ public class Main {
             System.err.println("Erro ao conectar no banco: " + e.getMessage());
         }
     }
-
-    public static void importarArquivoCSVMaquinaMemoria(List<String[]> dados, List<Mainframe> listaLido,Date ultimotimestamp) {
+    public static void importarArquivoCSVMaquinaMemoria(List<String[]> dados, List<Mainframe> listaLido) {
         try {
             SimpleDateFormat dtEntrada = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             SimpleDateFormat dtSaida = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -271,14 +417,9 @@ public class Main {
                 String[] registro = dados.get(i);
                 Mainframe mainframe = new Mainframe();
 
-                Date date = dtEntrada.parse(registro[1]);
-                mainframe.setTimestamp(dtSaida.format(date));
-                if (date.compareTo(ultimotimestamp)<=0) {
-                    continue;
-                }
                 try {
                     mainframe.setMacAdress(registro[0]);
-                    date = dtEntrada.parse(registro[1]);
+                    Date date = dtEntrada.parse(registro[1]);
                     mainframe.setTimestamp(dtSaida.format(date));
 
                     mainframe.setIdentificaoMainframe(registro[2]);
