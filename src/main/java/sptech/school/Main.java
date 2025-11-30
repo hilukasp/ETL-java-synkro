@@ -136,8 +136,9 @@ public class Main {
                     case 2:
                         valor = usoRam;
                         metrica = "Uso RAM";
-                        if (valor < min || valor > max) countRam++;
-                    {
+                        if (valor < min || valor > max) {
+
+                        countRam++;
                         if (countRam >= qtdIncidencias) {
                             gerarAlerta = true;
                             countRam = 0;
@@ -418,6 +419,16 @@ public class Main {
                 String[] registro = dados.get(i);
                 Mainframe mainframe = new Mainframe();
 
+                boolean ignorarLinha = false;
+                for(int x=1;x<registro.length;x++){
+                    if (registro[x]==null|| registro[x].isEmpty()){
+                        ignorarLinha = true;
+                        break;
+                    }
+                }
+                if (ignorarLinha) {
+                    continue;
+                }
                 try {
                     mainframe.setMacAdress(registro[0]);
                     Date date = dtEntrada.parse(registro[1]);
@@ -450,23 +461,29 @@ public class Main {
         try {
             SimpleDateFormat dtEntrada = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             SimpleDateFormat dtSaida = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String ultimoTimestamp = "";
             for (int i = 1; i < dados.size(); i++) {
                 String[] registro = dados.get(i);
-
+                boolean ignorarLinha = false;
+                for(int x=1;x<registro.length;x++){
+                    if (registro[x]==null|| registro[x].isEmpty()){
+                        ignorarLinha = true;
+                        break;
+                    }
+                }
+                if (ignorarLinha) {
+                    continue;
+                }
                 try {
+                    Processo processo = new Processo();
                     Date date = dtEntrada.parse(registro[0]);
                     String timestampAtual = dtSaida.format(date);
-                    if (timestampAtual.equals(ultimoTimestamp)) {
-                        continue;
-                    }
-                    ultimoTimestamp = timestampAtual;
 
-                    Processo processo = new Processo();
+
                     processo.setTimestamp(timestampAtual);
-                    processo.setTimestamp(dtSaida.format(date));
                     processo.setMacAdress(registro[1]);
                     processo.setIdentificacaoMainframe(registro[2]);
+                    processo.setCpu_total(Double.parseDouble(registro[3].replace(",", ".")));
+                    processo.setRam_total(Double.parseDouble(registro[4].replace(",", ".")));
 
                     //processos
                     processo.setNome1(registro[5]);
@@ -519,7 +536,7 @@ public class Main {
         }
     }
 
-    public static String gerarCsvTrusted(List<Mainframe> listamainframe, List<Processo> listaprocesso) {
+    public static String  gerarCsvTrusted(List<Mainframe> listamainframe, List<Processo> listaprocesso) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("macAdress;timestamp;identificao-mainframe;uso_cpu_total_%;uso_ram_total_%;uso_disco_total_%;disco_throughput_mbs;disco_iops_total;disco_read_count;disco_write_count;disco_latencia_ms;nome1;cpu_%1;mem_%1;nome2;cpu_%2;mem_%2;nome3;cpu_%3;mem_%3;nome4;cpu_%4;mem_%4;nome5;cpu_%5;mem_%5;nome6;cpu_%6;mem_%6;nome7;cpu_%7;mem_%7;nome8;cpu_%8;mem_%8;nome9;cpu_%9;mem_%9;\n");
