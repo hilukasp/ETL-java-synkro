@@ -47,6 +47,31 @@ public class ConexaoAws {
         return diretorios;
     }
 
+    public static List<String> listarDiretorios(String idEmpresa,String macAdress) {
+        List<String> diretorios = new ArrayList<>();
+        String bucket = pegarBucket("raw");
+
+        try {
+            ListObjectsV2Request listReq = ListObjectsV2Request.builder()
+                    .bucket(bucket)
+                    .prefix(idEmpresa+"/"+macAdress+"/")
+                    .delimiter("/")
+                    .build();
+
+            ListObjectsV2Response res = s3.listObjectsV2(listReq);
+
+
+            res.commonPrefixes().forEach(cp -> diretorios.add(cp.prefix()));
+
+            System.out.println("Diretórios encontrados dentro de "+idEmpresa+"/: " + diretorios);
+
+        } catch (Exception e) {
+            System.err.println("Erro ao listar diretórios: " + e.getMessage());
+        }
+
+        return diretorios;
+    }
+
     public static List<String> listarArquivosDoDiretorio(String diretorio) {
         List<String> arquivos = new ArrayList<>();
         String bucket = pegarBucket("raw");

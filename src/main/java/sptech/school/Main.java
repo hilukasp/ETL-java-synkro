@@ -38,24 +38,29 @@ public class Main {
 
             for (String idempresa:idEmpresas){
                 //Baixa e trata os CSVs do bucket RAW direto da AWS
-                List<String> diretorios=ConexaoAws.listarDiretorios(idempresa);
-                System.out.println(diretorios);
+                List<String> DiretoriosMacadress=ConexaoAws.listarDiretorios(idempresa);
+
 
                 //para cada diretório, faça
-                for (String diretorio : diretorios) {
-                    System.out.println(diretorio+"dados-mainframe.csv");
-                    List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"dados-mainframe.csv");
-                    List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"processos.csv");
+                for (String diretoriomac : DiretoriosMacadress) {
+                    List<String> Diretorio=ConexaoAws.listarDiretorios(idempresa, diretoriomac);
+                    for (String diretorio : Diretorio){
 
-                    importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe);
-                    importarArquivoCSVProcessoMemoria(dadosProcesso, listaLidoProcesso);
+                        System.out.println(diretoriomac+diretorio +"dados-mainframe.csv");
+                        List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw(diretoriomac+diretorio+"dados-mainframe.csv");
+                        List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw(diretoriomac+diretorio+"processos.csv");
 
-                    //Gera CSV tratado e envia pro bucket TRUSTED
-                    String csvTratado = gerarCsvTrusted(listaLidoMainframe, listaLidoProcesso);
-                    ConexaoAws.enviarCsvTrusted(diretorio+"trusted.csv", csvTratado);
+                        importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe);
+                        importarArquivoCSVProcessoMemoria(dadosProcesso, listaLidoProcesso);
 
-                    //Valida alertas no Synkro
-                    validarAlerta(listaLidoMainframe, listaLidoProcesso);
+                        //Gera CSV tratado e envia pro bucket TRUSTED
+                        String csvTratado = gerarCsvTrusted(listaLidoMainframe, listaLidoProcesso);
+                        ConexaoAws.enviarCsvTrusted(diretoriomac+diretorio+"trusted.csv", csvTratado);
+
+                        //Valida alertas no Synkro
+                        validarAlerta(listaLidoMainframe, listaLidoProcesso);
+                    }
+
 
                 }
             }
