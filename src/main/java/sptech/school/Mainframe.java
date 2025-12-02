@@ -24,26 +24,6 @@ public class Mainframe {
 
     }
 
-    @Override
-    public String toString() {
-        return "Mainframe{" +
-                "macAdress='" + macAdress + '\'' +
-                ", timestamp='" + timestamp + '\'' +
-                ", identificaoMainframe='" + identificaoMainframe + '\'' +
-                ", usoCpuTotal=" + usoCpuTotal +
-                ", usoRamTotal=" + usoRamTotal +
-                ", swapRateMbs=" + swapRateMbs +
-                ", tempoCpuOciosa=" + tempoCpuOciosa +
-                ", cpuIoWait=" + cpuIoWait +
-                ", usoDiscoTotal=" + usoDiscoTotal +
-                ", discoIopsTotal=" + discoIopsTotal +
-                ", discoThroughputMbs=" + discoThroughputMbs +
-                ", discoReadCount=" + discoReadCount +
-                ", discoWriteCount=" + discoWriteCount +
-                ", discoLatenciaMs=" + discoLatenciaMs +
-                '}';
-    }
-
     public String getMacAdress() {
         return macAdress;
     }
@@ -127,5 +107,25 @@ public class Mainframe {
     }
     public void setDiscoLatenciaMs(Double discoLatenciaMs) {
         this.discoLatenciaMs = discoLatenciaMs;
+    }
+
+    @Override
+    public String toString() {
+        return "Mainframe{" +
+                "macAdress='" + macAdress + '\'' +
+                ", timestamp='" + timestamp + '\'' +
+                ", identificaoMainframe='" + identificaoMainframe + '\'' +
+                ", usoCpuTotal=" + usoCpuTotal +
+                ", usoRamTotal=" + usoRamTotal +
+                ", swapRateMbs=" + swapRateMbs +
+                ", tempoCpuOciosa=" + tempoCpuOciosa +
+                ", cpuIoWait=" + cpuIoWait +
+                ", usoDiscoTotal=" + usoDiscoTotal +
+                ", discoIopsTotal=" + discoIopsTotal +
+                ", discoThroughputMbs=" + discoThroughputMbs +
+                ", discoReadCount=" + discoReadCount +
+                ", discoWriteCount=" + discoWriteCount +
+                ", discoLatenciaMs=" + discoLatenciaMs +
+                '}';
     }
 }

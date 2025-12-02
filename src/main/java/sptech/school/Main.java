@@ -43,19 +43,19 @@ public class Main {
 
                 //para cada diretório, faça
                 for (String diretoriomac : DiretoriosMacadress) {
-                    List<String> Diretorio=ConexaoAws.listarDiretorios(idempresa, diretoriomac);
+                    List<String> Diretorio=ConexaoAws.listarDiretorios(diretoriomac);
                     for (String diretorio : Diretorio){
 
-                        System.out.println(diretoriomac+diretorio +"dados-mainframe.csv");
-                        List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw(diretoriomac+diretorio+"dados-mainframe.csv");
-                        List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw(diretoriomac+diretorio+"processos.csv");
+                        System.out.println(diretorio +"dados-mainframe.csv");
+                        List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"dados-mainframe.csv");
+                        List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"processos.csv");
 
                         importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe);
                         importarArquivoCSVProcessoMemoria(dadosProcesso, listaLidoProcesso);
 
                         //Gera CSV tratado e envia pro bucket TRUSTED
                         String csvTratado = gerarCsvTrusted(listaLidoMainframe, listaLidoProcesso);
-                        ConexaoAws.enviarCsvTrusted(diretoriomac+diretorio+"trusted.csv", csvTratado);
+                        ConexaoAws.enviarCsvTrusted(diretorio+"trusted.csv", csvTratado);
 
                         //Valida alertas no Synkro
                         validarAlerta(listaLidoMainframe, listaLidoProcesso);
@@ -451,7 +451,6 @@ public class Main {
                     mainframe.setDiscoReadCount(Integer.valueOf(registro[11]));
                     mainframe.setDiscoWriteCount(Integer.valueOf(registro[12]));
                     mainframe.setDiscoLatenciaMs(Double.valueOf(registro[13].replace(",", ".")));
-
                     listaLido.add(mainframe);
                 } catch (NumberFormatException | ParseException erro) {
                     System.out.println("Linha ignorada por erro de formatação.");
@@ -549,7 +548,6 @@ public class Main {
         for (Processo processo : listaprocesso) {
             for (Mainframe mainframe : listamainframe) {
                 if (mainframe.getTimestamp().equals(processo.getTimestamp())) {
-
                     sb.append(String.format(
                             "%s;%s;%s;%.2f;%.2f;%.2f;%.2f;%d;%d;%d;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f;%s;%.2f;%.2f\n",
                             mainframe.getMacAdress(),
