@@ -1,0 +1,44 @@
+[33md1e1813[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m total cpu e ram alterados
+[33mc5bd26e[m total cpu e ram alterados
+[33m1c6ab01[m total cpu e ram alterados
+[33m095b6c0[m aa
+[33m614f666[m teste
+[33ma32fbf1[m jira
+[33m9b0b13d[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Update .env
+[33m80950b2[m Update .env
+[33m0d43521[m Update .env
+[33m8391b4e[m finalizado, colocando em arquitetura de pastas corretamente
+[33ma10ed0d[m mudando arquitetura
+[33mfeff16a[m se qualquer registro for nulo ele não cai no trusted, função iniciada. se der problema dar roll back
+[33m9a0f7ec[m finalixado
+[33m598e901[m finalizado
+[33m155add0[m com erro, fazendo arquivos nãos e repitirem
+[33m5d4f757[m Consertando a inserção de alertas
+[33m09d97cb[m trazendo todos os diretorios do raw e alocando eles no bucked trusted da S3
+[33mac56dda[m simulando dados
+[33m8846240[m arrumando bug
+[33m05933d7[m adicionando para o csv poder ser gerado localmente sem necessidade de conexao aws
+[33mff4ea92[m arquivo jar
+[33mf37455d[m final
+[33mb894d4a[m banco da bianca, atualizado. ETL funcional
+[33m2735c35[m ultimas alteracoes
+[33mf606bd9[m abrir chamado jira 1 vez
+[33m977bee2[m arrumando o tratamento
+[33m54b7ffb[m Adicionando qtd de incidencias para gerar alerta
+[33ma17f2df[m Adicionando qtd de incidencias para gerar alerta
+[33mb2e438f[m finalizado
+[33md51a6a8[m Alterando metodo main dentro dos connection
+[33m79dc3bc[m Etl funcionando no novo BD e manipulando os arquivos no bucket
+[33m8284337[m ETL Com novo BD e tratando nos Buckets
+[33m31550a2[m Metodo atualizado a nova estrutura do BD
+[33mf93bac7[m arrumei o select, insert com erro  Erro ao inserir alerta: Field 'fkGravidade' doesn't have a default value
+[33mfa915a8[m aplicando o jira. Select de buscarMetrica com defeito por conta da nova modelagem. Aguardar o campo, nome do componente e além disso aparece esse erro Erro ao buscar alertas: Column 'fkcomponente' in field list is ambiguous
+[33m6a2f170[m ETL buscando metricas do banco
+[33m454072f[m  Fazendo correção alertas com novo BD
+[33m63c719d[m ETL funcionando e conectada ao BD
+[33mfa1b32b[m Corrigindo conex~ao banco
+[33m15201d6[m tirando o processo generico system idle proccess
+[33mc2471c1[m mudei a posição do validar alerta
+[33m9a6cb6b[m Conexão BD ETL feita 100% pronto
+[33m78e040f[m criar csv e unir csv finalizado
+[33m785222d[m etlJava começo
