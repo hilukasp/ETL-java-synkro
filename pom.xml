@@ -40,6 +40,11 @@
             <artifactId>s3</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>profiles</artifactId>
+        </dependency>
+
         <!-- Unirest -->
         <dependency>
             <groupId>com.konghq</groupId>
