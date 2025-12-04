@@ -42,26 +42,39 @@ public class Main {
 
 
                 //para cada diretório, faça
-                for (String diretoriomac : DiretoriosMacadress) {
-                    List<String> Diretorio=ConexaoAws.listarDiretorios(diretoriomac);
-                    for (String diretorio : Diretorio){
+                for (String diretoriomac : DiretoriosMacadress){
+                    // 2. Lista os diretórios de Data dentro do MAC Adress (ex: 100/A1B2C3D4/02122025/)
+                    List<String> DiretoriosData = ConexaoAws.listarDiretorios(diretoriomac);
 
-                        System.out.println(diretorio +"dados-mainframe.csv");
-                        List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"dados-mainframe.csv");
-                        List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw(diretorio+"processos.csv");
+                    // Processamento diário (Arquivos RAW -> trusted.csv diário)
+                    for (String diretorioData : DiretoriosData){ // diretorioData é a pasta da data (ex: 100/MAC/02122025/)
+
+                        System.out.println("Processando dados de: " + diretorioData);
+
+                        // Lendo o CSV do RAW (a chave é a pasta da data + nome do arquivo)
+                        List<String[]> dadosMainframe = ConexaoAws.lerArquivoCsvDoRaw(diretorioData+"dados-mainframe.csv");
+                        List<String[]> dadosProcesso = ConexaoAws.lerArquivoCsvDoRaw(diretorioData+"processos.csv");
 
                         importarArquivoCSVMaquinaMemoria(dadosMainframe, listaLidoMainframe);
                         importarArquivoCSVProcessoMemoria(dadosProcesso, listaLidoProcesso);
 
-                        //Gera CSV tratado e envia pro bucket TRUSTED
+                        // Gera CSV tratado (conteúdo)
                         String csvTratado = gerarCsvTrusted(listaLidoMainframe, listaLidoProcesso);
-                        ConexaoAws.enviarCsvTrusted(diretorio+"trusted.csv", csvTratado);
 
-                        //Valida alertas no Synkro
+                        // Envia CSV tratado para o bucket TRUSTED (ARQUIVO DIÁRIO)
+                        ConexaoAws.enviarCsvTrusted(diretorioData+"trusted.csv", csvTratado);
+
+                        // Valida alertas no Synkro
                         validarAlerta(listaLidoMainframe, listaLidoProcesso);
+
+                        // IMPORTANTE: Limpa as listas para que os dados do próximo dia não se misturem
+                        listaLidoMainframe.clear();
+                        listaLidoProcesso.clear();
                     }
+                    String[] partes = diretoriomac.split("/");
+                    String macAdressPuro = partes.length > 1 ? partes[1] : diretoriomac.replace("/", "");
 
-
+                    ConexaoAws.consolidarArquivosTrusted(idempresa, macAdressPuro, DiretoriosData);
                 }
             }
 
