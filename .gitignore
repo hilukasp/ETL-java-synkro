@@ -27,7 +27,3 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-
-# Ignorar todos arquivos env
-.env*
-*.env*
