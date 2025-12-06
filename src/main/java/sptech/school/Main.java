@@ -107,7 +107,6 @@ public class Main {
             int countOc = 0, countWait = 0, countThru = 0, countIops = 0;
             int countRead = 0, countWrite = 0, countLat = 0;
 
-
             Mainframe mainframe = listamainframe.get(listamainframe.size() - 1);
             Processo processo = listaprocesso.get(listaprocesso.size() - 1);
 
